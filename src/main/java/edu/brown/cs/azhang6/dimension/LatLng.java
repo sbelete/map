@@ -1,5 +1,8 @@
 package edu.brown.cs.azhang6.dimension;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 /**
  * Represents a point with latitude and longitude.
  * 
@@ -43,6 +46,21 @@ public class LatLng implements Dimensional {
     private final double lng;
     
     /**
+     * Latitude in radians.
+     */
+    private final double latRadians;
+    
+    /**
+     * Longitude in radians.
+     */
+    private final double lngRadians;
+    
+    /**
+     * xyz-coordinates. Empty until requested.
+     */
+    private Optional<double[]> xyz = Optional.empty();
+    
+    /**
      * Instantiates with given latitude and longitude.
      * 
      * @param lat latitude
@@ -50,7 +68,21 @@ public class LatLng implements Dimensional {
      */
     public LatLng(double lat, double lng) {
         this.lat = lat;
+        this.latRadians = Math.toRadians(lat);
         this.lng = lng;
+        this.lngRadians = Math.toRadians(lng);
+    }
+    
+    /**
+     * Calculates xyz-coordinates.
+     */
+    private void fillXYZ() {
+      if (!xyz.isPresent()) {
+        double x = RADIUS * Math.cos(latRadians) * Math.cos(lngRadians);
+        double y = RADIUS * Math.cos(latRadians) * Math.sin(lngRadians);
+        double z = RADIUS * Math.sin(latRadians);
+        xyz = Optional.of(new double[] {x, y, z});
+      }
     }
     
     /**
@@ -66,7 +98,46 @@ public class LatLng implements Dimensional {
     public double getLng() {
         return lng;
     }
-
+    
+    /**
+     * @return latitude in radians
+     */
+    public double getLatRadians() {
+        return latRadians;
+    }
+    
+    /**
+     * @return longitude in radians
+     */
+    public double getLngRadians() {
+        return lngRadians;
+    }
+    
+    /**
+     * @return array of xyz-coordinates
+     */
+    public double[] getXYZ() {
+      fillXYZ();
+      return Arrays.copyOf(xyz.get(), xyz.get().length);
+    }
+    
+    /**
+     * Calculates tunnel (straight-line) distance to another latitude and
+     * longitude.
+     * 
+     * @param other other latitude and longitude
+     * @return tunnel distance
+     */
+    public double tunnelDistanceTo(LatLng other) {
+      double[] thisXYZ = this.getXYZ();
+      double[] otherXYZ = other.getXYZ();
+      double sumSquares = 0;
+      for (int i = 0; i < thisXYZ.length; i++) {
+        sumSquares += Math.pow(thisXYZ[i] - otherXYZ[i], 2);
+      }
+      return Math.sqrt(sumSquares);
+    }
+    
     /**
      * Gets the coordinate: 0 for latitude, 1 for longitude.
      * 
@@ -108,10 +179,10 @@ public class LatLng implements Dimensional {
         LatLng other = (LatLng) o;
         
         // Haversine formula
-        double dlon = other.lng - this.lng;
-        double dlat = other.lat - this.lat;
-        double a = Math.pow(Math.sin(dlat / 2), 2) + Math.cos(this.lat)
-                * Math.cos(other.lat) * Math.pow(Math.sin(dlon / 2), 2);
+        double dlon = other.lngRadians - this.lngRadians;
+        double dlat = other.latRadians - this.latRadians;
+        double a = Math.pow(Math.sin(dlat / 2), 2) + Math.cos(this.latRadians)
+                * Math.cos(other.latRadians) * Math.pow(Math.sin(dlon / 2), 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         double d = RADIUS * c;
         return d;
