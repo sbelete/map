@@ -60,8 +60,8 @@ class NodeProxy extends Node {
                 try {
                     r.next();
                     double[] latLng = new double[2];
-                    latLng[1] = r.getDouble(1);
-                    latLng[2] = r.getDouble(2);
+                    latLng[0] = r.getDouble("latitude");
+                    latLng[1] = r.getDouble("longitude");
                     return latLng;
                 } catch (SQLException e) {
                     throw new RuntimeException(e);

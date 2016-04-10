@@ -39,6 +39,6 @@ PROJECT=$(basename $(pwd))
 #cp /course/cs032/data/bacon/bacon.sqlite3 /ltmp/$USER >/dev/null
 #chmod +w /ltmp/$USER/bacon.sqlite3
 
-java -cp $TARGET:$CP edu.brown.cs.$USER.$PROJECT.Main "$@"
+java -cp $TARGET:$CP edu.brown.cs.$USER.maps.Main "$@"
 
 #rm -rf /ltmp/$USER/bacon.sqlite3

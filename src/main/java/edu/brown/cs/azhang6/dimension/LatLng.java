@@ -1,6 +1,7 @@
 package edu.brown.cs.azhang6.dimension;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -202,5 +203,30 @@ public class LatLng implements Dimensional {
                 throw new IllegalArgumentException(
                         "invalid coordinate for LatLng: must be 0 or 1");
         }
+    }
+    
+    /**
+     * Compares two LatLng objects by latitude and longitude.
+     * 
+     * @param o other LatLng
+     * @return equality between this object and other object
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof LatLng)) {
+            return false;
+        }
+        LatLng other = (LatLng) o;
+        return this.lat == other.lat && this.lng == other.lng;
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(lat, lng);
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("[LatLng: lat=%f, lng=%f]", lat, lng);
     }
 }

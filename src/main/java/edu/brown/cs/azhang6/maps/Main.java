@@ -12,6 +12,7 @@ import com.google.gson.Gson;
 import edu.brown.cs.azhang6.db.Database;
 import freemarker.template.Configuration;
 import java.nio.charset.IllegalCharsetNameException;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
@@ -78,7 +79,7 @@ public class Main {
     private void run() {
         // Possible options
         OptionParser parser = new OptionParser();
-        OptionSpec<String> argsSpec
+        OptionSpec<String> dbSpec
             = parser.nonOptions().ofType(String.class);
         parser.accepts("help", "display help message");
         parser.accepts("gui", "run spark server");
@@ -86,7 +87,11 @@ public class Main {
         try {
             // Parse options
             OptionSet options = parser.parse(args);
-            List<String> arguments = options.valuesOf(argsSpec);
+            String dbString = options.valueOf(dbSpec);
+            if (dbString == null) {
+                System.out.println(USAGE);
+                System.exit(1);
+            }
             if (options.has("help")) {
                 // Exit if --help is given
                 parser.printHelpOn(System.out);
@@ -95,7 +100,7 @@ public class Main {
             }
             // Build database
             try {
-                db = new Database(options.valueOf(argsSpec));
+                db = new Database(dbString);
                 Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                     try {
                         if (db != null) {

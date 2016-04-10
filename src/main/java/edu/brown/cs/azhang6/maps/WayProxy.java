@@ -3,6 +3,7 @@ package edu.brown.cs.azhang6.maps;
 import edu.brown.cs.azhang6.db.Database;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Way proxy that queries a database for information.
@@ -20,7 +21,7 @@ public class WayProxy extends Way {
      * Internal way.
      */
     private final Way internal = new Way(getId());
-    
+
     /**
      * Whether internal has been filled.
      */
@@ -44,10 +45,26 @@ public class WayProxy extends Way {
     public static void setDB(Database db) {
         WayProxy.db = db;
     }
-    
+
+    /**
+     * Gets IDs corresponding to way name.
+     *
+     * @param name name
+     * @return list of IDs corresponding to name
+     */
+    public static List<String> idsForName(String name) {
+        try (PreparedStatement prep = db.getConn().prepareStatement(
+            "SELECT id FROM way WHERE name=?;")) {
+            prep.setString(1, name);
+            return db.query(prep);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * Fills internal way with information from database.
-     * 
+     *
      * @return internal way
      */
     private Way fill() {
@@ -73,7 +90,7 @@ public class WayProxy extends Way {
         }
         return internal;
     }
-    
+
     @Override
     public String getStart() {
         return fill().getStart();

@@ -112,6 +112,16 @@ public class KDNode<T extends Dimensional> implements KDVertex<T> {
       right = new KDNode<>(rightList, (coordinate + 1) % numDimensions, split, max);
     }
   }
+  
+  /**
+   * Package-protected constructor for compatibility with old stars tests.
+   * 
+   * @param elements elements
+   * @param coordinate splitting coordinate
+   */
+  KDNode(List<T> elements, int coordinate) {
+      this(elements, coordinate, 0, 0);
+  }
 
   /**
    * Calculates the median of the list of elements relative to the coordinate to

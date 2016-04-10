@@ -57,6 +57,15 @@ public class KDLeaf<T extends Dimensional> implements KDVertex<T> {
     this.max = max;
     this.elements = new ArrayList<>(elements);
   }
+  
+  /**
+   * Package-protected constructor for compatibility with old stars tests.
+   * 
+   * @param elements elements
+   */
+  KDLeaf(List<T> elements) {
+      this(elements, 0, 0);
+  }
 
   /**
    * Finds number of elements in this leaf. Useful for testing.

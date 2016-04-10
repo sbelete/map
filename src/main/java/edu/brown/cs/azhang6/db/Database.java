@@ -101,13 +101,10 @@ public class Database implements AutoCloseable {
      */
     public boolean has(String table, String column1, String value1,
         String column2, String value2) {
-        try (PreparedStatement prep
-            = conn.prepareStatement("SELECT * FROM ? WHERE ?=? AND ?=?;")) {
-            prep.setString(1, table);
-            prep.setString(2, column1);
-            prep.setString(3, value1);
-            prep.setString(4, column2);
-            prep.setString(5, value2);
+        try (PreparedStatement prep = conn.prepareStatement(String.format(
+            "SELECT * FROM %s WHERE %s=? AND %s=?;", table, column1, column2))) {
+            prep.setString(1, value1);
+            prep.setString(2, value2);
             return !query(prep).isEmpty();
         } catch (SQLException e) {
             throw new RuntimeException(e);
