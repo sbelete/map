@@ -187,4 +187,12 @@ public class GraphsTest {
         assertTrue(Graphs.dijkstraAStar(
             g.vertexByName(1), v -> v.equals(g.vertexByName(6)), v -> 2).second() == 11);
     }
+    
+    /**
+     * Tests specifically for the A* version.
+     */
+    @Test
+    public void testDijkstraAStar4() {
+        
+    }
 }

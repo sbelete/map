@@ -19,6 +19,7 @@ import edu.brown.cs.azhang6.graph.Vertex;
 import edu.brown.cs.azhang6.graphs.Graphs;
 import edu.brown.cs.azhang6.graphs.Walk;
 import edu.brown.cs.azhang6.kdtree.KDNode;
+import edu.brown.cs.azhang6.kdtree.KDNodeParallel;
 import edu.brown.cs.azhang6.kdtree.KDVertex;
 import edu.brown.cs.azhang6.kdtree.LatLngKDTree;
 import edu.brown.cs.azhang6.pair.OrderedPair;
@@ -27,6 +28,7 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
@@ -63,24 +65,24 @@ public class Main {
      * Database.
      */
     private Database db;
-    
+
     /**
      * Traffic client.
      */
     private TrafficClient traffic;
-    
+
     /**
      * Default traffic server port.
      */
     private static final int TRAFFIC_PORT = 8080;
-    
+
     /**
      * Number of milliseconds between traffic queries.
      */
     private static final int TRAFFIC_QUERY_RATE = 5000;
 
     /**
-     * GSON.  Package-protected since the traffic client also uses GSON.
+     * GSON. Package-protected since the traffic client also uses GSON.
      */
     static final Gson GSON = new Gson();
 
@@ -90,29 +92,39 @@ public class Main {
     private KDVertex<Node> nodes;
     
     /**
+     * KD-tree parallel level, for efficiency.
+     */
+    private static final int KD_TREE_PARALLEL_LEVEL = 4;
+    
+    /**
+     * Autocorrect.
+     */
+    private StreetComplete corrector;
+
+    /**
      * Latitude of center of screen.
      */
     private double lat;
-    
+
     /**
      * Longitude of center of screen.
      */
     private double lng;
-    
+
     /**
      * Size of screen in terms of degrees latitude.
      */
     private double size;
-    
+
     /**
      * Edges shown on screen.
      */
-    private double[][] shownEdges;
-    
+    private double[][] shownEdges = new double[0][];
+
     /**
      * Edges shown on screen that are part of a shortest path.
      */
-    private double[][] pathEdges;
+    private double[][] pathEdges = new double[0][];
 
     /**
      * Runs application with command line arguments.
@@ -173,16 +185,17 @@ public class Main {
                 NodeProxy.setDB(db);
                 WayProxy.setDB(db);
             } catch (ClassNotFoundException | SQLException e) {
-                System.out.println("ERROR: couldn't load database: " + e);
+                System.out.println("ERROR: couldn't load database");
             }
             // Setup traffic server
             try {
                 traffic = new TrafficClient(String.format(
                     "http://localhost:%d?last=", TRAFFIC_PORT));
+                Way.setTrafficClient(traffic);
                 traffic.query();
                 traffic.start(TRAFFIC_QUERY_RATE);
             } catch (IOException e) {
-                System.out.println("ERROR: couldn't connect to traffic server: " + e);
+                System.out.println("ERROR: couldn't connect to traffic server");
             }
             // Whether to run GUI or REPL
             if (options.has("gui")) {
@@ -213,7 +226,8 @@ public class Main {
                     throw new RuntimeException(e);
                 }
             });
-            nodes = new LatLngKDTree<>(new KDNode<>(nodesToAdd, 0));
+            nodes = new LatLngKDTree<>(
+                new KDNodeParallel<>(nodesToAdd, 0, KD_TREE_PARALLEL_LEVEL));
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -222,40 +236,15 @@ public class Main {
     /**
      * Sets up trie.
      */
-    StreetComplete corrector; // I don't know where else to put it
     private void setupAutocorrect() {
-
-    	try (PreparedStatement prep = db.getConn().prepareStatement(
-                "SELECT name FROM way;")) {
-                List<String> streets = new ArrayList<>();
-                
-                db.query(prep, rs -> {
-                    try {
-                        while (rs.next()) {
-                           
-                        }
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-                
-                corrector = new StreetComplete(streets, streets);
-                
-                nodes = null; //new LatLngKDTree<>(new KDNode<>(nodesToAdd, 0));
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-
         try (PreparedStatement prep = db.getConn().prepareStatement(
-                "SELECT name FROM way;")) {
-                List<String> collection = db.query(prep);
-                // Build trie from collection here
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-
+            "SELECT name FROM way;")) {
+            List<String> streets = db.query(prep);
+            corrector = new StreetComplete(streets, streets);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
-
 
     /**
      * Runs REPL.
@@ -269,7 +258,7 @@ public class Main {
      */
     private void runSparkServer() {
         setupKDTree();
-        setupAutocorrect();
+        //setupAutocorrect();
 
         // Setup Spark
         Spark.externalStaticFileLocation("src/main/resources/static");
@@ -363,7 +352,7 @@ public class Main {
             synchronized (traffic) {
                 shortestPath = Graphs.dijkstra(startNode, n -> endNode.equals(n));
             }
-            
+
             // Send information about shortest path
             List<Vertex<Node, Way>> vertices = shortestPath.first().getVertices();
             List<Edge<Node, Way>> edges = shortestPath.first().getEdges();
@@ -371,7 +360,7 @@ public class Main {
             for (int i = 0; i < edges.size(); i++) {
                 Node v1 = vertices.get(i).getValue().get();
                 Node v2 = vertices.get(i + 1).getValue().get();
-                pathEdges[i] = new double[] {
+                pathEdges[i] = new double[]{
                     v1.getLat(), v1.getLng(), v2.getLat(), v2.getLng(),
                     edges.get(i).getValue().get().traffic()
                 };
@@ -400,25 +389,25 @@ public class Main {
             QueryParamsMap qm = req.queryMap();
             double latitude = Double.parseDouble(qm.value("lat"));
             double longitude = Double.parseDouble(qm.value("lon"));
-            double size = Double.parseDouble(qm.value("size"));
+            double size = Double.parseDouble(qm.value("s"));
             // Get all points that should be displayed
             LatLngSize box = new LatLngSize(latitude, longitude, size);
-            List<DimensionalDistance<Node>> withinRadius =
-                nodes.withinRadius(new LatLng(latitude, longitude), box.radius, null);
+            List<DimensionalDistance<Node>> withinRadius
+                = nodes.withinRadius(new LatLng(latitude, longitude), box.radius, null);
             List<Node> displayedNodes = withinRadius.stream()
                 .map(dd -> dd.getDimensional())
                 .filter(ll -> box.contains(ll)).collect(Collectors.toList());
             // Get all edges that should be displayed
             List<Edge<Node, Way>> displayedEdges = new ArrayList<>();
             displayedNodes.forEach(n -> displayedEdges.addAll(n.getDWEdges()));
-            
+
             // Send information about shown edges
             shownEdges = new double[displayedEdges.size()][];
             for (int i = 0; i < shownEdges.length; i++) {
                 Edge<Node, Way> e = displayedEdges.get(i);
                 Node v1 = e.getEndpoints().s().getValue().get();
                 Node v2 = e.getEndpoints().t().getValue().get();
-                shownEdges[i] = new double[] {
+                shownEdges[i] = new double[]{
                     v1.getLat(), v1.getLng(), v2.getLat(), v2.getLng(),
                     e.getValue().get().traffic()
                 };
@@ -429,15 +418,18 @@ public class Main {
             return GSON.toJson(variables);
         }
     }
-    
+
+    /**
+     * Handler for /auto.
+     */
     private class AutocorrectHandler implements Route {
 
         /**
-         * Gets shortest path.
-         *
-         * @param req request containing a street name
+         * Autocorrect.
+         * 
+         * @param req request
          * @param res unused
-         * @return shortest path
+         * @return autocorrect suggestions
          */
         @Override
         public Object handle(final Request req, final Response res) {
@@ -445,10 +437,9 @@ public class Main {
             String streetName = qm.value("street_name");
             List<String> suggestions = corrector.suggest(streetName);
 
-            // Send latitude and longitude of nearest neighbor
             List<Object> variables
                 = ImmutableList.of(suggestions.subList(0, 4));
-            
+
             return GSON.toJson(variables);
         }
     }
@@ -486,7 +477,7 @@ public class Main {
             minLat = lat - size / 2;
             maxLat = lat + size / 2;
             // Degrees of longitude shown
-            lngSize = size * 110.574 / (111.320 * Math.cos(lat));
+            lngSize = size * 110.574 / (111.320 * Math.cos(Math.toRadians(lat)));
             // Min and max longitude shown
             minLng = lng - lngSize / 2;
             maxLng = lng + lngSize / 2;
@@ -494,6 +485,7 @@ public class Main {
             radius = Math.max(
                 new LatLng(lat, lng).distanceTo(new LatLng(minLat, minLng)),
                 new LatLng(lat, lng).distanceTo(new LatLng(maxLat, maxLng)));
+            System.out.println("calculated radius = " + radius);
         }
 
         /**
@@ -520,9 +512,9 @@ public class Main {
         }
 
         /**
-         * Returns a LatLng equivalent to the original LatLng, but with longitude
-         * wrapped. So if the original has longitude 160, the result has
-         * longitude -200.
+         * Returns a LatLng equivalent to the original LatLng, but with
+         * longitude wrapped. So if the original has longitude 160, the result
+         * has longitude -200.
          *
          * @param original original LatLng
          * @return wrapped LatLng
@@ -537,15 +529,15 @@ public class Main {
             return original;
         }
     }
-    
+
     /**
      * Handler for /clear.
      */
     private class ClearHandler implements Route {
-        
+
         /**
          * Clears shortest path.
-         * 
+         *
          * @param req unused
          * @param res unused
          * @return shown edges
@@ -559,15 +551,15 @@ public class Main {
             return GSON.toJson(variables);
         }
     }
-    
+
     /**
      * Handler for /findIntersection.
      */
     private class FindIntersectionHandler implements Route {
-        
+
         /**
          * Finds intersection of two ways.
-         * 
+         *
          * @param req request with names of two ways
          * @param res unused
          * @return intersection of two ways
@@ -579,19 +571,19 @@ public class Main {
             String way1Name = qm.value("first_street");
             String way2Name = qm.value("second_street");
             Node intersection = NodeProxy.atIntersection(way1Name, way2Name);
-            
+
             // Send information about intersection
             Map<String, Object> variables;
             if (intersection == null) {
                 variables = ImmutableMap.of(
-                "id", null,
-                "lat", null,
-                "lng", null);
+                    "id", null,
+                    "lat", null,
+                    "lng", null);
             } else {
                 variables = ImmutableMap.of(
-                "id", intersection.getId(),
-                "lat", intersection.getLat(),
-                "lng", intersection.getLng());
+                    "id", intersection.getId(),
+                    "lat", intersection.getLat(),
+                    "lng", intersection.getLng());
             }
             return GSON.toJson(variables);
         }

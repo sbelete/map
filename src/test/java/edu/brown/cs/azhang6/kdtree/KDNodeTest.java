@@ -18,7 +18,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * Tests for {@link KDNode}.
+ * Tests for {@link KDNode} and {@link KDNodeParallel}.
  *
  * @author aaronzhang
  */
@@ -208,34 +208,14 @@ public class KDNodeTest {
         new Point(0, 0, 0), Integer.MAX_VALUE, s -> true).isEmpty());
 
     // Create an oracle to run many more tests
-    KDTreeOracle oracle = new KDTreeOracle<>(tree, stars);
+    KDTreeOracle<Star> oracle = new KDTreeOracle<>(tree, stars);
     assertTrue(oracle.testNearestNeighbors());
     assertTrue(oracle.testRadiusSearch());
-  }
-  
-  /**
-   * Uses oracle to test kd-tree with LatLng.
-   */
-  @Test
-  public void testLatLng() {
-      /*
-      try {
-          Database db = new Database("files/medMaps.sqlite3");
-          NodeProxy.setDB(db);
-          try (PreparedStatement prep = db.getConn().prepareStatement(
-              "SELECT id FROM node;")) {
-              List<Node> nodes = db.query(prep).stream().map(s -> Node.of(s))
-                  .collect(Collectors.toList());
-              KDNode<Node> tree =
-                  new KDNode<>(nodes, 0, LatLng.MIN_LAT, LatLng.MAX_LAT);
-              KDTreeOracle<Node> oracle =
-                  new KDTreeOracle<>(tree, nodes, LatLng::new);
-              assertTrue(oracle.testNearestNeighbors());
-              assertTrue(oracle.testRadiusSearch());
-          }
-      } catch (ClassNotFoundException | SQLException e) {
-          throw new RuntimeException(e);
-      }
-          */
+    
+    // Oracle tests for parallel kd-tree
+    KDNodeParallel<Star> treeParallel = new KDNodeParallel<>(stars, 0, 3);
+    KDTreeOracle<Star> oracleParallel = new KDTreeOracle<>(treeParallel, stars);
+    assertTrue(oracleParallel.testNearestNeighbors());
+    assertTrue(oracleParallel.testRadiusSearch());
   }
 }

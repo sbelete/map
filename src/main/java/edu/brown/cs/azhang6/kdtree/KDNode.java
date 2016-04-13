@@ -20,28 +20,28 @@ public class KDNode<T extends Dimensional> implements KDVertex<T> {
   /**
    * Index of coordinate to split.
    */
-  private final int coordinate;
+  protected int coordinate;
 
   /**
    * Value of coordinate to split at.
    */
-  private final double split;
+  protected double split;
 
   /**
    * Left subtree.
    */
-  private final KDVertex<T> left;
+  protected KDVertex<T> left;
 
   /**
    * Right subtree.
    */
-  private final KDVertex<T> right;
+  protected KDVertex<T> right;
 
   /**
    * If a list of elements contains more than {@link RANDOM_MEDIAN} elements and
    * calculating its median is required, the median will be estimated.
    */
-  private static final int RANDOM_MEDIAN = 20;
+  static final int RANDOM_MEDIAN = 20;
 
   /**
    * Constructs a new {@code KDNode} with the given elements and index of
@@ -98,6 +98,13 @@ public class KDNode<T extends Dimensional> implements KDVertex<T> {
       right = new KDNode<>(rightList, (coordinate + 1) % numDimensions);
     }
   }
+  
+  /**
+   * Should only be used by other classes in this package.
+   */
+  KDNode() {
+      
+  }
 
   /**
    * Calculates the median of the list of elements relative to the coordinate to
@@ -106,7 +113,7 @@ public class KDNode<T extends Dimensional> implements KDVertex<T> {
    * @param elements list to find median of, which must be modifiable
    * @return median coordinate of list of elements
    */
-  private double median(List<T> elements) {
+  protected double median(List<T> elements) {
     Collections.sort(elements, (T e1, T e2)
         -> e1.getCoordinate(coordinate) < e2.getCoordinate(coordinate)
             ? -1 : 1);

@@ -6,10 +6,10 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -20,9 +20,10 @@ import java.util.concurrent.TimeUnit;
 public class TrafficClient {
     
     /**
-     * Map from way ID to traffic.
+     * Map from way ID to traffic.  Concurrent because one thread might be
+     * writing to it and another thread might be reading from it.
      */
-    private final Map<String, Double> traffic = new HashMap<>();
+    private final Map<String, Double> traffic = new ConcurrentHashMap<>();
     
     /**
      * URL of traffic server, without the timestamp.
