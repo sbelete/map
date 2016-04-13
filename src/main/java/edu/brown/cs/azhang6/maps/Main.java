@@ -24,6 +24,8 @@ import edu.brown.cs.azhang6.kdtree.KDVertex;
 import edu.brown.cs.azhang6.kdtree.LatLngKDTree;
 import edu.brown.cs.azhang6.pair.OrderedPair;
 import freemarker.template.Configuration;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.nio.charset.IllegalCharsetNameException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -90,31 +92,31 @@ public class Main {
      * KD-tree.
      */
     private KDVertex<Node> nodes;
-    
+
+    /**
+     * Flag for an empty database of nodes.
+     */
+    private boolean empty = false;
+
     /**
      * KD-tree parallel level, for efficiency.
      */
     private static final int KD_TREE_PARALLEL_LEVEL = 4;
-    
+
+    /**
+     * Used in REPL: if input has no quotes, it splits into this many pieces.
+     */
+    private static final int PIECES_NO_QUOTES = 4;
+
+    /**
+     * Used in REPL: if input has quotes, it splits into this many pieces.
+     */
+    private static final int PIECES_QUOTES = 8;
+
     /**
      * Autocorrect.
      */
     private StreetComplete corrector;
-
-    /**
-     * Latitude of center of screen.
-     */
-    private double lat;
-
-    /**
-     * Longitude of center of screen.
-     */
-    private double lng;
-
-    /**
-     * Size of screen in terms of degrees latitude.
-     */
-    private double size;
 
     /**
      * Edges shown on screen.
@@ -226,6 +228,9 @@ public class Main {
                     throw new RuntimeException(e);
                 }
             });
+            if (nodesToAdd.isEmpty()) {
+                empty = true;
+            }
             nodes = new LatLngKDTree<>(
                 new KDNodeParallel<>(nodesToAdd, 0, KD_TREE_PARALLEL_LEVEL));
         } catch (SQLException e) {
@@ -250,7 +255,137 @@ public class Main {
      * Runs REPL.
      */
     private void runREPL() {
+        // Make sure database of nodes isn't empty
         setupKDTree();
+        System.out.println("READY");
+        if (empty) {
+            System.out.println("ERROR: empty database of nodes");
+            return;
+        }
+        // Read standard input
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+            System.in, "UTF-8"))) {
+            String line;
+            replLoop:
+            while ((line = reader.readLine()) != null) {
+                // End if given empty line
+                if (line.isEmpty()) {
+                    break;
+                }
+
+                // Else, split line into pieces
+                boolean hasQuotes = line.contains("\"");
+                List<String> piecesQuotes = null;
+                List<Double> piecesSpaces = null;
+                if (hasQuotes) {
+                    // Split on quotes to get streets
+                    String[] splitByQuotes = line.split("\"");
+                    if (splitByQuotes.length != PIECES_QUOTES) {
+                        System.out.println(
+                            "Input incorrectly formatted: wrong number of quotes");
+                        continue;
+                    }
+                    piecesQuotes = new ArrayList<>();
+                    for (int i = 1; i < splitByQuotes.length; i += 2) {
+                        piecesQuotes.add(splitByQuotes[i]);
+                    }
+                } else {
+                    // Split on spaces to get coordinates
+                    String[] splitBySpaces = line.split(" ");
+                    if (splitBySpaces.length != PIECES_NO_QUOTES) {
+                        System.out.println(
+                            "Input incorrectly formatted: wrong number of spaces");
+                        continue;
+                    }
+                    piecesSpaces = new ArrayList<>();
+                    for (int i = 0; i < splitBySpaces.length; i++) {
+                        try {
+                            piecesSpaces.add(Double.parseDouble(splitBySpaces[i]));
+                        } catch (NumberFormatException e) {
+                            System.out.println(
+                                "Input incorrectly formatted: can't parse coordinates");
+                            continue replLoop;
+                        }
+                    }
+                }
+
+                // Get start and end nodes
+                Node start;
+                Node end;
+                if (hasQuotes) {
+                    start = NodeProxy.atIntersection(
+                        piecesQuotes.get(0), piecesQuotes.get(1));
+                    if (start == null) {
+                        System.out.println("First two streets don't intersect");
+                        continue;
+                    }
+                    end = NodeProxy.atIntersection(
+                        piecesQuotes.get(2), piecesQuotes.get(3));
+                    if (end == null) {
+                        System.out.println("Last two streets don't intersect");
+                        continue;
+                    }
+                } else {
+                    start = nodes.nearestNeighbors(
+                        new LatLng(piecesSpaces.get(0), piecesSpaces.get(1)),
+                        1, null).get(0).getDimensional();
+                    end = nodes.nearestNeighbors(
+                        new LatLng(piecesSpaces.get(2), piecesSpaces.get(3)),
+                        1, null).get(0).getDimensional();
+                }
+
+                // Find and print shortest path
+                if (start.equals(end)) {
+                    System.out.println("Start and end nodes are the same");
+                    continue;
+                }
+                OrderedPair<Walk<Node, Way>, Double> shortestPath
+                    = Graphs.dijkstraAStar(start, n -> n.equals(end),
+                        n -> n.tunnelDistanceTo(end));
+                System.out.println(
+                    formatOutput(shortestPath, "\n", start.getId(), end.getId()));
+            }
+        } catch (IOException e) {
+            System.out.println("ERROR reading input");
+        }
+    }
+
+    /**
+     * Formats output of Dijkstra's algorithm with the specified line separator.
+     *
+     * @param result output of Dijkstra's algorithm
+     * @param lineSeparator appended to each line
+     * @param start start vertex of Dijkstra's algorithm
+     * @param end end vertex of Dijkstra's algorithm
+     */
+    private String formatOutput(OrderedPair<Walk<Node, Way>, Double> result,
+        String lineSeparator, String start, String end) {
+        StringBuilder sb = new StringBuilder();
+
+        // If there is a path, format it
+        if (result != null) {
+            Walk<Node, Way> walk = result.first();
+            List<Vertex<Node, Way>> walkVertices = walk.getVertices();
+            List<Edge<Node, Way>> walkEdges = walk.getEdges();
+            for (int i = 0; i < walkEdges.size(); i++) {
+                Edge<Node, Way> edge = walkEdges.get(i);
+                Vertex<Node, Way> tail = walkVertices.get(i);
+                Vertex<Node, Way> head = walkVertices.get(i + 1);
+                sb.append(String.format("%s -> %s : %s",
+                    tail.getValue().get().getId(),
+                    head.getValue().get().getId(),
+                    edge.getValue().get().getId()));
+                // Don't append the line separator after the last line
+                if (i < walkEdges.size() - 1) {
+                    sb.append(lineSeparator);
+                }
+            }
+        } else {
+            // If there isn't a path
+            sb.append(String.format("%s -/- %s", start, end));
+        }
+
+        return sb.toString();
     }
 
     /**
@@ -350,7 +485,8 @@ public class Main {
             Node endNode = Node.of(endId);
             OrderedPair<Walk<Node, Way>, Double> shortestPath;
             synchronized (traffic) {
-                shortestPath = Graphs.dijkstra(startNode, n -> endNode.equals(n));
+                shortestPath = Graphs.dijkstraAStar(startNode, n -> endNode.equals(n),
+                    n -> n.tunnelDistanceTo(endNode));
             }
 
             // Send information about shortest path
@@ -426,7 +562,7 @@ public class Main {
 
         /**
          * Autocorrect.
-         * 
+         *
          * @param req request
          * @param res unused
          * @return autocorrect suggestions
@@ -485,7 +621,6 @@ public class Main {
             radius = Math.max(
                 new LatLng(lat, lng).distanceTo(new LatLng(minLat, minLng)),
                 new LatLng(lat, lng).distanceTo(new LatLng(maxLat, maxLng)));
-            System.out.println("calculated radius = " + radius);
         }
 
         /**
