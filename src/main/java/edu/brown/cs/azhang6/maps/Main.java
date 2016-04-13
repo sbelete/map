@@ -198,7 +198,26 @@ public class Main {
      * Sets up trie.
      */
     private void setupAutocorrect() {
+<<<<<<< Updated upstream
 
+=======
+    	try (PreparedStatement prep = db.getConn().prepareStatement(
+                "SELECT name FROM way;")) {
+                List<String> collection = new ArrayList<>();
+                db.query(prep, rs -> {
+                    try {
+                        while (rs.next()) {
+                           
+                        }
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+                nodes = new LatLngKDTree<>(new KDNode<>(nodesToAdd, 0));
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+>>>>>>> Stashed changes
     }
 
     /**
