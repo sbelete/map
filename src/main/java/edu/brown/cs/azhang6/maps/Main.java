@@ -14,6 +14,7 @@ import edu.brown.cs.azhang6.dimension.Dimensional;
 import edu.brown.cs.azhang6.dimension.DimensionalDistance;
 import edu.brown.cs.azhang6.dimension.LatLng;
 import edu.brown.cs.azhang6.graph.Edge;
+import edu.brown.cs.azhang6.graph.Vertex;
 import edu.brown.cs.azhang6.graphs.Graphs;
 import edu.brown.cs.azhang6.graphs.Walk;
 import edu.brown.cs.azhang6.kdtree.KDNode;
@@ -61,11 +62,26 @@ public class Main {
      * Database.
      */
     private Database db;
+    
+    /**
+     * Traffic client.
+     */
+    private TrafficClient traffic;
+    
+    /**
+     * Default traffic server port.
+     */
+    private static final int TRAFFIC_PORT = 8080;
+    
+    /**
+     * Number of milliseconds between traffic queries.
+     */
+    private static final int TRAFFIC_QUERY_RATE = 5000;
 
     /**
-     * GSON.
+     * GSON.  Package-protected since the traffic client also uses GSON.
      */
-    private static final Gson GSON = new Gson();
+    static final Gson GSON = new Gson();
 
     /**
      * KD-tree.
@@ -158,11 +174,19 @@ public class Main {
             } catch (ClassNotFoundException | SQLException e) {
                 System.out.println("ERROR: couldn't load database: " + e);
             }
+            // Setup traffic server
+            try {
+                traffic = new TrafficClient(String.format(
+                    "http://localhost:%d?last=", TRAFFIC_PORT));
+                traffic.query();
+                traffic.start(TRAFFIC_QUERY_RATE);
+            } catch (IOException e) {
+                System.out.println("ERROR: couldn't connect to traffic server: " + e);
+            }
+            // Whether to run GUI or REPL
             if (options.has("gui")) {
-                // Run gui
                 runSparkServer();
             } else {
-                // If neither --help nor --gui, run REPL
                 runREPL();
             }
         } catch (OptionException e) {
@@ -198,27 +222,15 @@ public class Main {
      * Sets up trie.
      */
     private void setupAutocorrect() {
-<<<<<<< Updated upstream
-
-=======
-    	try (PreparedStatement prep = db.getConn().prepareStatement(
+        try (PreparedStatement prep = db.getConn().prepareStatement(
                 "SELECT name FROM way;")) {
-                List<String> collection = new ArrayList<>();
-                db.query(prep, rs -> {
-                    try {
-                        while (rs.next()) {
-                           
-                        }
-                    } catch (SQLException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-                nodes = new LatLngKDTree<>(new KDNode<>(nodesToAdd, 0));
+                List<String> collection = db.query(prep);
+                // Build trie from collection here
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
->>>>>>> Stashed changes
     }
+
 
     /**
      * Runs REPL.
@@ -283,6 +295,7 @@ public class Main {
          */
         @Override
         public Object handle(final Request req, final Response res) {
+            // Find nearest neighbor
             QueryParamsMap qm = req.queryMap();
             double latitude = Double.parseDouble(qm.value("lat"));
             double longitude = Double.parseDouble(qm.value("lon"));
@@ -291,9 +304,10 @@ public class Main {
             Node nearestNeighbor = nearestNeighbors.get(0).getDimensional();
 
             // Send latitude and longitude of nearest neighbor
-            Map<String, Object> variables
-                = ImmutableMap.of("lat", nearestNeighbor.getLat(),
-                    "lng", nearestNeighbor.getLng());
+            Map<String, Object> variables = ImmutableMap.of(
+                "id", nearestNeighbor.getId(),
+                "lat", nearestNeighbor.getLat(),
+                "lng", nearestNeighbor.getLng());
             return GSON.toJson(variables);
         }
     }
@@ -312,23 +326,32 @@ public class Main {
          */
         @Override
         public Object handle(final Request req, final Response res) {
+            // Find shortest path
             QueryParamsMap qm = req.queryMap();
             String startId = qm.value("start_id");
             String endId = qm.value("end_id");
             Node startNode = Node.of(startId);
             Node endNode = Node.of(endId);
-            OrderedPair<Walk<Node, Way>, Double> shortestPath =
-                Graphs.dijkstra(startNode, n -> endNode.equals(n));
+            OrderedPair<Walk<Node, Way>, Double> shortestPath;
+            synchronized (traffic) {
+                shortestPath = Graphs.dijkstra(startNode, n -> endNode.equals(n));
+            }
+            
+            // Send information about shortest path
+            List<Vertex<Node, Way>> vertices = shortestPath.first().getVertices();
             List<Edge<Node, Way>> edges = shortestPath.first().getEdges();
-            pathEdges = new double[edges.size()][2];
-            /*
-            TODO: fill in pathEdges
-            */
-
-            // Send latitude and longitude of nearest neighbor
-            Map<String, Object> variables
-                = ImmutableMap.of("shownEdges", shownEdges,
-                    "pathEdges", pathEdges);
+            pathEdges = new double[edges.size()][];
+            for (int i = 0; i < edges.size(); i++) {
+                Node v1 = vertices.get(i).getValue().get();
+                Node v2 = vertices.get(i + 1).getValue().get();
+                pathEdges[i] = new double[] {
+                    v1.getLat(), v1.getLng(), v2.getLat(), v2.getLng(),
+                    edges.get(i).getValue().get().traffic()
+                };
+            }
+            Map<String, Object> variables = ImmutableMap.of(
+                "shownEdges", shownEdges,
+                "pathEdges", pathEdges);
             return GSON.toJson(variables);
         }
     }
@@ -360,15 +383,22 @@ public class Main {
                 .filter(ll -> box.contains(ll)).collect(Collectors.toList());
             // Get all edges that should be displayed
             List<Edge<Node, Way>> displayedEdges = new ArrayList<>();
-            displayedNodes.forEach(node -> displayedEdges.addAll(node.getDWEdges()));
-            /*
-            TODO make it return object with shownEdges and pathEdges
-            */
-
-            // Send latitude and longitude of nearest neighbor
-            Map<String, Object> variables
-                = ImmutableMap.of("shownEdges", shownEdges,
-                    "pathEdges", pathEdges);
+            displayedNodes.forEach(n -> displayedEdges.addAll(n.getDWEdges()));
+            
+            // Send information about shown edges
+            shownEdges = new double[displayedEdges.size()][];
+            for (int i = 0; i < shownEdges.length; i++) {
+                Edge<Node, Way> e = displayedEdges.get(i);
+                Node v1 = e.getEndpoints().s().getValue().get();
+                Node v2 = e.getEndpoints().t().getValue().get();
+                shownEdges[i] = new double[] {
+                    v1.getLat(), v1.getLng(), v2.getLat(), v2.getLng(),
+                    e.getValue().get().traffic()
+                };
+            }
+            Map<String, Object> variables = ImmutableMap.of(
+                "shownEdges", shownEdges,
+                "pathEdges", pathEdges);
             return GSON.toJson(variables);
         }
     }
@@ -464,15 +494,19 @@ public class Main {
     private class ClearHandler implements Route {
         
         /**
-         * TODO.
+         * Clears shortest path.
          * 
-         * @param req
-         * @param res
-         * @return 
+         * @param req unused
+         * @param res unused
+         * @return shown edges
          */
         @Override
         public Object handle(final Request req, final Response res) {
-            return null;
+            pathEdges = new double[0][];
+            Map<String, Object> variables = ImmutableMap.of(
+                "shownEdges", shownEdges,
+                "pathEdges", pathEdges);
+            return GSON.toJson(variables);
         }
     }
     
@@ -482,15 +516,34 @@ public class Main {
     private class FindIntersectionHandler implements Route {
         
         /**
-         * TODO.
+         * Finds intersection of two ways.
          * 
-         * @param req
-         * @param res
-         * @return 
+         * @param req request with names of two ways
+         * @param res unused
+         * @return intersection of two ways
          */
         @Override
         public Object handle(final Request req, final Response res) {
-            return null;
+            // Get intersection
+            QueryParamsMap qm = req.queryMap();
+            String way1Name = qm.value("first_street");
+            String way2Name = qm.value("second_street");
+            Node intersection = NodeProxy.atIntersection(way1Name, way2Name);
+            
+            // Send information about intersection
+            Map<String, Object> variables;
+            if (intersection == null) {
+                variables = ImmutableMap.of(
+                "id", null,
+                "lat", null,
+                "lng", null);
+            } else {
+                variables = ImmutableMap.of(
+                "id", intersection.getId(),
+                "lat", intersection.getLat(),
+                "lng", intersection.getLng());
+            }
+            return GSON.toJson(variables);
         }
     }
 

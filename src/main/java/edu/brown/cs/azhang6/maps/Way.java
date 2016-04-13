@@ -14,6 +14,11 @@ public class Way {
      * Cache of ways. Map from ID to way.
      */
     private static HashMap<String, Way> cache = new HashMap<>();
+    
+    /**
+     * Traffic client.
+     */
+    private static TrafficClient traffic;
 
     /**
      * ID.
@@ -65,6 +70,15 @@ public class Way {
     public Way(String id) {
         this(id, null, null, null, null);
     }
+    
+    /**
+     * Sets traffic client.
+     * 
+     * @param traffic traffic client
+     */
+    public static void setTrafficClient(TrafficClient traffic) {
+        Way.traffic = traffic;
+    }
 
     /**
      * Returns a way with the given ID. If a way in the cache has the given ID,
@@ -104,12 +118,30 @@ public class Way {
     }
     
     /**
-     * Gets length of way.
+     * Gets length of way including traffic.
      * 
-     * @return length
+     * @return length including traffic
      */
     public double length() {
+        return distance() * traffic();
+    }
+    
+    /**
+     * Gets length of way not including traffic.
+     * 
+     * @return distance
+     */
+    public double distance() {
         return Node.of(getStart()).distanceTo(Node.of(getEnd()));
+    }
+    
+    /**
+     * Gets traffic.
+     * 
+     * @return traffic
+     */
+    public double traffic() {
+        return traffic == null ? 1 : traffic.getTraffic(id);
     }
 
     /**

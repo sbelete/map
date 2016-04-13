@@ -153,6 +153,11 @@ public class NodeProxy extends Node {
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
+        } else {
+            // Make sure ways have updated traffic
+            for (DWEdge<Node, Way> edge : internal.getDWEdges()) {
+                edge.setWeight(edge.getValue().get().length());
+            }
         }
         return internal;
     }
