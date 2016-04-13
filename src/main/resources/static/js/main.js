@@ -25,6 +25,8 @@ var finish_lat;
 var finish_lng;
 var finish_id;
 
+var cache = {};
+
 setInterval(repaint, 5000);
 repaint();
 
@@ -116,18 +118,21 @@ function paint(nodesJSON){
 	for (int i = 0; i < oldEdges.length; i++) {
 		var coords = cache[oldEdges[i][0]];
 		var traffic = oldEdges[i][1];
-		paintCoordsTraffic(coords, traffic, 1);
+		if (pathEdges[oldEdges[i][0]] == null) {
+			paintCoordsTraffic(coords, traffic, 1);
+		} else {
+			paintCoordsTraffic(coords, traffic, 3);
+		}
 	}
 	for (int i = 0; i < newEdges.length; i++) {
 		var coords = newCoords[i];
 		cache[newEdges[i][0]] = coords;
 		var traffic = newEdges[i][1];
-		paintCoordsTraffic(coords, traffic, 1);
-	}
-	for (int i = 0; i < pathEdges.length; i++) {
-		var coords = cache[pathEdges[i][0]];
-		var traffic = pathEdges[i][1];
-		paintCoordsTraffic(coords, traffic, 3);
+		if (pathEdges[newEdges[i][0]] == null) {
+			printCoordsTraffic(coords, traffic, 1);
+		} else {
+			paintCoordsTraffic(coords, traffic, 3);
+		}
 	}
 
 	/*
