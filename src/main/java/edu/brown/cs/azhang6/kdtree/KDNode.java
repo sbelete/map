@@ -26,16 +26,6 @@ public class KDNode<T extends Dimensional> implements KDVertex<T> {
    * Value of coordinate to split at.
    */
   private final double split;
-  
-  /**
-   * Minimum value of coordinate to be stored in this node.
-   */
-  private final double min;
-  
-  /**
-   * Maximum value of coordinate to be stored in this node.
-   */
-  private final double max;
 
   /**
    * Left subtree.
@@ -62,15 +52,11 @@ public class KDNode<T extends Dimensional> implements KDVertex<T> {
    *
    * @param elements nonempty list of elements
    * @param coordinate index of coordinate to split
-   * @param min minimum splitting coordinate
-   * @param max maximum splitting coordiante
    * @throws IllegalArgumentException if list of elements is empty
    */
-  public KDNode(List<T> elements, int coordinate, double min, double max)
+  public KDNode(List<T> elements, int coordinate)
       throws IllegalArgumentException {
     this.coordinate = coordinate;
-    this.min = min;
-    this.max = max;
     List<T> elementsCopy = new ArrayList<>(elements);
 
     // Find median coordinate, or estimate the median if list is long
@@ -102,25 +88,15 @@ public class KDNode<T extends Dimensional> implements KDVertex<T> {
     // The subtrees are either nodes or leaves, based on size
     int numDimensions = elementsCopy.get(0).numDimensions();
     if (leftList.size() <= KDLeaf.MAX_COUNT) {
-      left = new KDLeaf<>(leftList, min, split);
+      left = new KDLeaf<>(leftList);
     } else {
-      left = new KDNode<>(leftList, (coordinate + 1) % numDimensions, min, split);
+      left = new KDNode<>(leftList, (coordinate + 1) % numDimensions);
     }
     if (rightList.size() <= KDLeaf.MAX_COUNT) {
-      right = new KDLeaf<>(rightList, split, max);
+      right = new KDLeaf<>(rightList);
     } else {
-      right = new KDNode<>(rightList, (coordinate + 1) % numDimensions, split, max);
+      right = new KDNode<>(rightList, (coordinate + 1) % numDimensions);
     }
-  }
-  
-  /**
-   * Package-protected constructor for compatibility with old stars tests.
-   * 
-   * @param elements elements
-   * @param coordinate splitting coordinate
-   */
-  KDNode(List<T> elements, int coordinate) {
-      this(elements, coordinate, 0, 0);
   }
 
   /**
@@ -213,17 +189,6 @@ public class KDNode<T extends Dimensional> implements KDVertex<T> {
             } else {
                 left.nearestNeighbors(d, n, ignore, current);
             }
-        } else if (leftFirst) {
-            // Here, we're checking for possible "wrapping around"
-            if (d.distanceTo(d.withCoordinate(coordinate, right.getMax()))
-                    < farthest) {
-                right.nearestNeighbors(d, n, ignore, current);
-            }
-        } else {
-            if (d.distanceTo(d.withCoordinate(coordinate, left.getMin()))
-                    < farthest) {
-                left.nearestNeighbors(d, n, ignore, current);
-            }
         }
     }
   }
@@ -254,14 +219,6 @@ public class KDNode<T extends Dimensional> implements KDVertex<T> {
         if (leftFirst) {
             right.withinRadius(d, r, ignore, current);
         } else {
-            left.withinRadius(d, r, ignore, current);
-        }
-    } else if (leftFirst) {
-        if (d.distanceTo(d.withCoordinate(coordinate, right.getMax())) < r) {
-            right.withinRadius(d, r, ignore, current);
-        }
-    } else {
-        if (d.distanceTo(d.withCoordinate(coordinate, left.getMin())) < r) {
             left.withinRadius(d, r, ignore, current);
         }
     }
@@ -303,20 +260,4 @@ public class KDNode<T extends Dimensional> implements KDVertex<T> {
     return String.format("KDNode splitting coordinate %d at %f",
         coordinate, split);
   }
-
-    /**
-     * {@inheritDoc}
-     */
-  @Override
-    public double getMin() {
-        return min;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public double getMax() {
-        return max;
-    }
 }

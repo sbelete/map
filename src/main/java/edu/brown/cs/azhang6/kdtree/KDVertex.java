@@ -22,20 +22,6 @@ public interface KDVertex<T extends Dimensional> {
    * @return number of elements in this vertex
    */
   int size();
-  
-  /**
-   * Minimum value of splitting coordinate that can be stored in this vertex.
-   * 
-   * @return minimum value of splitting coordinate
-   */
-  double getMin();
-  
-  /**
-   * Maximum value of splitting coordinate that can be stored in this vertex.
-   * 
-   * @return maximum value of splitting coordinate
-   */
-  double getMax();
 
   /**
    * Checks whether this vertex contains an element. Useful for testing.

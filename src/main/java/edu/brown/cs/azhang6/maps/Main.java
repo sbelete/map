@@ -10,10 +10,18 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import edu.brown.cs.azhang6.db.Database;
+import edu.brown.cs.azhang6.dimension.Dimensional;
+import edu.brown.cs.azhang6.dimension.DimensionalDistance;
+import edu.brown.cs.azhang6.dimension.LatLng;
+import edu.brown.cs.azhang6.kdtree.KDNode;
+import edu.brown.cs.azhang6.kdtree.KDVertex;
+import edu.brown.cs.azhang6.kdtree.LatLngKDTree;
 import freemarker.template.Configuration;
 import java.nio.charset.IllegalCharsetNameException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -54,6 +62,11 @@ public class Main {
      * GSON.
      */
     private static final Gson GSON = new Gson();
+
+    /**
+     * KD-tree.
+     */
+    private KDVertex<Node> nodes;
 
     /**
      * Runs application with command line arguments.
@@ -134,7 +147,22 @@ public class Main {
      * Sets up kd-tree.
      */
     private void setupKDTree() {
-
+        try (PreparedStatement prep = db.getConn().prepareStatement(
+            "SELECT id FROM node;")) {
+            List<Node> nodesToAdd = new ArrayList<>();
+            db.query(prep, rs -> {
+                try {
+                    while (rs.next()) {
+                        nodesToAdd.add(Node.of(rs.getString(1)));
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            nodes = new LatLngKDTree<>(new KDNode<>(nodesToAdd, 0));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -164,6 +192,12 @@ public class Main {
         FreeMarkerEngine freeMarker = createEngine();
         // Home page
         Spark.get("/home", new HomeHandler(), freeMarker);
+        // Nearest neighbor
+        Spark.post("/nearestNeighbor", new NearestNeighborHandler());
+        // Shortest path
+        Spark.post("/shortestPath", new ShortestPathHandler());
+        // Get edges to display
+        Spark.post("/getEdges", new GetEdgesHandler());
     }
 
     /**
@@ -181,6 +215,194 @@ public class Main {
         @Override
         public ModelAndView handle(Request req, Response res) {
             return new ModelAndView(ImmutableMap.of(), "maps.ftl");
+        }
+    }
+
+    /**
+     * Handler for /nearestNeighbor.
+     */
+    private class NearestNeighborHandler implements Route {
+
+        /**
+         * Gets nearest neighbor.
+         *
+         * @param req request containing latitude and longitude
+         * @param res unused
+         * @return nearest neighbor
+         */
+        @Override
+        public Object handle(final Request req, final Response res) {
+            QueryParamsMap qm = req.queryMap();
+            double latitude = Double.parseDouble(qm.value("lat"));
+            double longitude = Double.parseDouble(qm.value("lon"));
+            List<DimensionalDistance<Node>> nearestNeighbors
+                = nodes.nearestNeighbors(new LatLng(latitude, longitude), 1, null);
+            Node nearestNeighbor = nearestNeighbors.get(0).getDimensional();
+
+            // Send latitude and longitude of nearest neighbor
+            Map<String, Object> variables
+                = ImmutableMap.of("lat", nearestNeighbor.getLat(),
+                    "lng", nearestNeighbor.getLng());
+            return GSON.toJson(variables);
+        }
+    }
+
+    /**
+     * Handler for /shortestPath.
+     */
+    private class ShortestPathHandler implements Route {
+
+        /**
+         * Gets shortest path.
+         *
+         * @param req request containing start and end nodes
+         * @param res unused
+         * @return shortest path
+         */
+        @Override
+        public Object handle(final Request req, final Response res) {
+            /*
+             TODO
+             */
+            QueryParamsMap qm = req.queryMap();
+            double latitude = Double.parseDouble(qm.value("lat"));
+            double longitude = Double.parseDouble(qm.value("lon"));
+            List<DimensionalDistance<Node>> nearestNeighbors
+                = nodes.nearestNeighbors(new LatLng(latitude, longitude), 1, null);
+            Node nearestNeighbor = nearestNeighbors.get(0).getDimensional();
+
+            // Send latitude and longitude of nearest neighbor
+            Map<String, Object> variables
+                = ImmutableMap.of("lat", nearestNeighbor.getLat(),
+                    "lng", nearestNeighbor.getLng());
+            return GSON.toJson(variables);
+        }
+    }
+
+    /**
+     * Handler for /getEdges.
+     */
+    private class GetEdgesHandler implements Route {
+
+        /**
+         * Gets edges.
+         *
+         * @param req request containing bounding box
+         * @param res unused
+         * @return shortest path
+         */
+        @Override
+        public Object handle(final Request req, final Response res) {
+            QueryParamsMap qm = req.queryMap();
+            double latitude = Double.parseDouble(qm.value("lat"));
+            double longitude = Double.parseDouble(qm.value("lon"));
+            double size = Double.parseDouble(qm.value("size"));
+            // Get all points that should be displayed
+            LatLngSize box = new LatLngSize(latitude, longitude, size);
+            List<DimensionalDistance<Node>> withinRadius =
+                nodes.withinRadius(new LatLng(latitude, longitude), box.radius, null);
+            List<Node> displayedNodes = withinRadius.stream()
+                .map(dd -> dd.getDimensional())
+                .filter(ll -> box.contains(ll)).collect(Collectors.toList());
+            /*
+            TODO
+            */
+            
+            List<DimensionalDistance<Node>> nearestNeighbors
+                = nodes.nearestNeighbors(new LatLng(latitude, longitude), 1, null);
+            Node nearestNeighbor = nearestNeighbors.get(0).getDimensional();
+
+            // Send latitude and longitude of nearest neighbor
+            Map<String, Object> variables
+                = ImmutableMap.of("lat", nearestNeighbor.getLat(),
+                    "lng", nearestNeighbor.getLng());
+            return GSON.toJson(variables);
+        }
+    }
+
+    /**
+     * Information obtained from latitude, longitude, and size.
+     */
+    private static class LatLngSize {
+
+        // Latitude, longitude, and size
+
+        private final double lat;
+        private final double lng;
+        private final double size;
+
+        // Additional information calculated from the above three
+        private final double minLat;
+        private final double maxLat;
+        private final double lngSize;
+        private final double minLng;
+        private final double maxLng;
+        private final double radius;
+
+        /**
+         * Calculates info given latitude, longitude, and size.
+         *
+         * @param lat latitude
+         * @param lng longitude
+         * @param size size (degrees latitude)
+         */
+        LatLngSize(double lat, double lng, double size) {
+            this.lat = lat;
+            this.lng = lng;
+            this.size = size;
+            // Min and max latitude shown
+            minLat = lat - size / 2;
+            maxLat = lat + size / 2;
+            // Degrees of longitude shown
+            lngSize = size * 110.574 / (111.320 * Math.cos(lat));
+            // Min and max longitude shown
+            minLng = lng - lngSize / 2;
+            maxLng = lng + lngSize / 2;
+            // Approximate radius
+            radius = Math.max(
+                new LatLng(lat, lng).distanceTo(new LatLng(minLat, minLng)),
+                new LatLng(lat, lng).distanceTo(new LatLng(maxLat, maxLng)));
+        }
+
+        /**
+         * Whether point is contained in this region.
+         *
+         * @param point LatLng
+         * @return whether point is contained in this region
+         */
+        boolean contains(LatLng point) {
+            return containsHelper(point) || containsHelper(wrapped(point));
+        }
+
+        /**
+         * Helper for above method.
+         *
+         * @param point LatLng
+         * @return whether point is contained in this region
+         */
+        boolean containsHelper(LatLng point) {
+            return point.getLat() >= minLat
+                && point.getLat() <= maxLat
+                && point.getLng() >= minLng
+                && point.getLng() <= maxLng;
+        }
+
+        /**
+         * Returns a LatLng equivalent to the original LatLng, but with longitude
+         * wrapped. So if the original has longitude 160, the result has
+         * longitude -200.
+         *
+         * @param original original LatLng
+         * @return wrapped LatLng
+         */
+        private static LatLng wrapped(LatLng original) {
+            double originalLng = original.getLng();
+            if (originalLng > 0) {
+                return (LatLng) original.withCoordinate(1, originalLng - 360);
+            } else if (originalLng < 0) {
+                return (LatLng) original.withCoordinate(1, originalLng + 360);
+            }
+            return original;
         }
     }
 

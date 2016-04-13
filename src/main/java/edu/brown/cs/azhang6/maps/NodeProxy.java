@@ -6,15 +6,17 @@ import edu.brown.cs.azhang6.graph.MutableDWEdge;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Node proxy that queries a database for node information when necessary.
  *
  * @author aaronzhang
  */
-class NodeProxy extends Node {
+public class NodeProxy extends Node {
 
     /**
      * Database with node information.
@@ -71,6 +73,56 @@ class NodeProxy extends Node {
             throw new RuntimeException(e);
         }
     }
+    
+    /**
+     * Gets the node at the intersection of two ways, or null if no such node.
+     * 
+     * @param way1 name of first way
+     * @param way2 name of second way
+     * @return node at intersection
+     */
+    public static Node atIntersection(String way1, String way2) {
+        List<String> way1Ids = WayProxy.idsForName(way1);
+        List<String> way2Ids = WayProxy.idsForName(way2);
+        Set<String> way1Nodes = new HashSet<>();
+        Set<String> way2Nodes = new HashSet<>();
+        // Get all the nodes on the two ways
+        try (PreparedStatement prep = db.getConn().prepareStatement(
+            "SELECT start,end FROM way WHERE id=?;")) {
+            for (String way1Id : way1Ids) {
+                prep.setString(1, way1Id);
+                db.query(prep, rs -> {
+                    try {
+                        rs.next();
+                        way1Nodes.add(rs.getString(1));
+                        way1Nodes.add(rs.getString(2));
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+            for (String way2Id : way2Ids) {
+                prep.setString(1, way2Id);
+                db.query(prep, rs -> {
+                    try {
+                        rs.next();
+                        way2Nodes.add(rs.getString(1));
+                        way2Nodes.add(rs.getString(2));
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+            // Find the intersection of the two sets
+            way1Nodes.retainAll(way2Nodes);
+            if (way1Nodes.isEmpty()) {
+                return null;
+            }
+            return Node.of(way1Nodes.iterator().next());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * Uses the provided database for node information.
@@ -105,9 +157,6 @@ class NodeProxy extends Node {
         return internal;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public List<? extends DWEdge<Node, Way>> getDWEdges() {
         return fillEdges().getDWEdges();

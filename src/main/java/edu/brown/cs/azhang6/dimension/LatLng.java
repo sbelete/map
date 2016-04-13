@@ -75,6 +75,16 @@ public class LatLng implements Dimensional {
     }
     
     /**
+     * Instantiates with array of latitude and longitude.  Array must have at
+     * least two elements.
+     * 
+     * @param coordinates latitude and longitude
+     */
+    public LatLng(double[] coordinates) {
+        this(coordinates[0], coordinates[1]);
+    }
+    
+    /**
      * Calculates xyz-coordinates.
      */
     private void fillXYZ() {

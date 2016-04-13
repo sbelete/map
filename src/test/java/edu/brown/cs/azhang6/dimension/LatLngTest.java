@@ -153,6 +153,11 @@ public class LatLngTest {
             new LatLng(-54.8, -120.1)), 11190, EPSILON2);
         assertEquals(new LatLng(50.5, 0).distanceTo(
             new LatLng(0, -1)), 5616, EPSILON2);
+        // Distance should "wrap around": -180 longitude = 180 longitude
+        assertEquals(new LatLng(0, -180).distanceTo(
+            new LatLng(0, 180)), 0, EPSILON2);
+        assertEquals(new LatLng(14.7, -162.6).distanceTo(
+            new LatLng(5, 155)), 4760, EPSILON2);
     }
 
     /**

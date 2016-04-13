@@ -1,12 +1,19 @@
 package edu.brown.cs.azhang6.kdtree;
 
+import edu.brown.cs.azhang6.db.Database;
+import edu.brown.cs.azhang6.dimension.LatLng;
 import edu.brown.cs.azhang6.dimension.Point;
+import edu.brown.cs.azhang6.maps.Node;
+import edu.brown.cs.azhang6.maps.NodeProxy;
 import edu.brown.cs.azhang6.stars.Star;
 import edu.brown.cs.azhang6.stars.StarsReader;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -248,5 +255,28 @@ public class KDLeafTest {
     KDTreeOracle oracle = new KDTreeOracle<>(tree, stars);
     assertTrue(oracle.testNearestNeighbors());
     assertTrue(oracle.testRadiusSearch());
+  }
+  
+  /**
+   * Uses oracle to test kd-tree with LatLng.
+   */
+  @Test
+  public void testLatLng() {
+      try {
+          Database db = new Database("files/smallMaps.sqlite3");
+          NodeProxy.setDB(db);
+          try (PreparedStatement prep = db.getConn().prepareStatement(
+              "SELECT id FROM node;")) {
+              List<Node> nodes = db.query(prep).stream().map(s -> Node.of(s))
+                  .collect(Collectors.toList());
+              KDLeaf<Node> tree = new KDLeaf<>(nodes);
+              KDTreeOracle<Node> oracle =
+                  new KDTreeOracle<>(tree, nodes, LatLng::new);
+              assertTrue(oracle.testNearestNeighbors());
+              assertTrue(oracle.testRadiusSearch());
+          }
+      } catch (ClassNotFoundException | SQLException e) {
+          throw new RuntimeException(e);
+      }
   }
 }

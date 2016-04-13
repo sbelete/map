@@ -26,16 +26,6 @@ public class KDLeaf<T extends Dimensional> implements KDVertex<T> {
    * Elements contained in this leaf.
    */
   private final List<T> elements;
-  
-  /**
-   * Minimum splitting coordinate.
-   */
-  private final double min;
-  
-  /**
-   * Maximum splitting coordinate.
-   */
-  private final double max;
 
   /**
    * Constructs a new {@code KDLeaf} with the elements in the given list. The
@@ -43,28 +33,15 @@ public class KDLeaf<T extends Dimensional> implements KDVertex<T> {
    * the list argument after construction will not affect this object.
    *
    * @param elements list of elements
-   * @param min minimum value of splitting coordinate
-   * @param max maximum value of splitting coordinate
    * @throws IllegalArgumentException if list is too large
    */
-  public KDLeaf(List<T> elements, double min, double max) {
+  public KDLeaf(List<T> elements) {
     int size = elements.size();
     if (size > MAX_COUNT) {
       throw new IllegalArgumentException(
           String.format("Too many elements in a KDLeaf: %d", size));
     }
-    this.min = min;
-    this.max = max;
     this.elements = new ArrayList<>(elements);
-  }
-  
-  /**
-   * Package-protected constructor for compatibility with old stars tests.
-   * 
-   * @param elements elements
-   */
-  KDLeaf(List<T> elements) {
-      this(elements, 0, 0);
   }
 
   /**
@@ -159,20 +136,4 @@ public class KDLeaf<T extends Dimensional> implements KDVertex<T> {
   public String toString() {
     return String.format("KDLeaf with elements: %s", elements);
   }
-
-  /**
-   * {@inheritDoc}
-   */
-    @Override
-    public double getMin() {
-        return min;
-    }
-
-    /**
-   * {@inheritDoc}
-   */
-    @Override
-    public double getMax() {
-        return max;
-    }
 }

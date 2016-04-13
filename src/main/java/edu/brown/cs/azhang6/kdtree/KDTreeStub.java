@@ -140,16 +140,6 @@ class KDTreeStub<T extends Dimensional> implements KDVertex<T> {
     public String toString() {
         return "KDTreeStub returning correct query results";
     }
-
-    @Override
-    public double getMin() {
-        throw new UnsupportedOperationException("Not supported since this is a stub");
-    }
-
-    @Override
-    public double getMax() {
-        throw new UnsupportedOperationException("Not supported since this is a stub");
-    }
 }
 
 /**

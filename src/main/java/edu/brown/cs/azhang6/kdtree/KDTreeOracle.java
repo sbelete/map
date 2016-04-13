@@ -61,7 +61,7 @@ class KDTreeOracle<T extends Dimensional> {
   /**
    * Constructor.
    */
-  private Function<double[], Dimensional> constructor;
+  private Function<double[], ? extends Dimensional> constructor;
 
   /**
    * Creates a new {@code KDTreeOracle} that tests the subject against correct
@@ -101,7 +101,7 @@ class KDTreeOracle<T extends Dimensional> {
    * @param constructor constructor
    */
   KDTreeOracle(KDVertex<T> subject, List<T> elements,
-      Function<double[], Dimensional> constructor) {
+      Function<double[], ? extends Dimensional> constructor) {
       this(subject, elements);
       this.constructor = constructor;
   }

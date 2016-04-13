@@ -32,6 +32,7 @@ public class NodeTest {
         try {
             db = new Database("files/smallMaps.sqlite3");
             NodeProxy.setDB(db);
+            WayProxy.setDB(db);
         } catch (ClassNotFoundException | SQLException e) {
             throw new RuntimeException(e);
         }
@@ -81,5 +82,24 @@ public class NodeTest {
         assertTrue(Node.has("/n/3"));
         Node.clearCache();
         assertFalse(Node.has("/n/3"));
+    }
+    
+    /**
+     * Tests for {@link NodeProxy#atIntersection(String, String)}.
+     */
+    @Test
+    public void testAtIntersection() {
+        assertEquals(NodeProxy.atIntersection(
+            "Chihiro Ave", "Sootball Ln").getId(), "/n/1");
+        assertEquals(NodeProxy.atIntersection(
+            "Sootball Ln", "Chihiro Ave").getId(), "/n/1");
+        assertEquals(NodeProxy.atIntersection(
+            "Chihiro Ave", "Radish Spirit Blvd").getId(), "/n/0");
+        assertEquals(NodeProxy.atIntersection(
+            "Radish Spirit Blvd", "Chihiro Ave").getId(), "/n/0");
+        assertTrue(NodeProxy.atIntersection(
+            "Chihiro Ave", "Yubaba St") == null);
+        assertTrue(NodeProxy.atIntersection(
+            "Chihiro Ave", "nonexistent") == null);
     }
 }
