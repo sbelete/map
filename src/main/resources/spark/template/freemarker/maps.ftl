@@ -2,25 +2,38 @@
 <div id="content">
 <canvas id="map" width="600" height="600"></canvas>
 
-<form id="start">
-  Start Street 1:<br>
+<div id= "word_maps">
+</div>
+
+<div id= "forms">
+
+<form class="start">
+  Start Street 1: 
   <input type="text" name="start_street_1">
-  <br>
-  Start Street 2:<br>
-  <input type="text" name="start_street_1">
-  <input type="submit" value="Submit">
+  <br><br>
+  Start Street 2:
+  <input type="text" name="start_street_1"><br><br>
+  <input type="button" value="Submit" id="btnsubmit" onclick="submitStart()">
   <input type="button" value="Clear" id="btnsubmit" onclick="clearForm()">
 </form>
 
-<form id="destination">
-  Destination Street 1:<br>
-  <input type="text" name="finish_street_1">
-  <br>
-  Destination Street 2:<br>
-  <input type="text" name="finish_street_2">
-  <input type="submit" value="Submit">
+<br><br>
+<form class="destination">
+   Start Street 1: 
+   <input type="text" name="finish_street_1">
+  <br><br>
+  Start Street 2:
+  <input type="text" name="finish_street_1"><br><br>
+  <input type="button" value="Submit" id="btnsubmit" onclick="submitFinish()">
   <input type="button" value="Clear" id="btnsubmit" onclick="clearForm()">
 </form>
+</div>
+
+<div id= "enter">
+<input type = "button" value="Enter" onclick="shortestPath()">
+</div>
+
+
 </div>
 </#assign>
 <#include "main.ftl">

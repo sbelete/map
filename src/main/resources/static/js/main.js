@@ -229,6 +229,11 @@ function clearStart() {
 	   // Get the first form with the name
 	   var frm = document.getElementsByName('start')[0];
 	   frm.reset();  // Reset
+	   $.post("/clear", {}, paint);
+	   finish_id = null;
+	   finish_lat = null;
+	   finihs_lng = null;
+	   paintEnter(false);
 	   return false; // Prevent page refresh
 };
 
@@ -244,6 +249,11 @@ function clearDestination() {
 	   // Get the first form with the name
 	   var frm = document.getElementsByName('start')[0];
 	   frm.reset();  // Reset
+	   $.post("/clear", {}, paint);
+	   finish_id = null;
+	   finish_lat = null;
+	   finihs_lng = null;
+	   paintEnter(false);
 	   return false; // Prevent page refresh
 };
 
@@ -256,20 +266,6 @@ function submitDestination() {
 	   frm.reset();  // Reset
 	   return false; // Prevent page refresh
 };
-
-/*
-submit.addEventListener("click", shortestPath);
-
-clear.addEventListener("click", function () {
-	$.post("/clear", {}, paint);
-});
-
-clearText1.addEventListener("click", textClear1);
-clearText2.addEventListener("click", textClear2);
-
-enterText1.addEventListener("click", textEnter1);
-enterText1.addEventListener("click", textEnter2);
-*/
 
 canvas.addEventListener("mousedown", function(event){
 	mouseDownX = event.clientX;
