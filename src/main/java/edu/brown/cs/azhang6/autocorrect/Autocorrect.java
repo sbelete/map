@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 public class Autocorrect extends Trie {
-	private static int led = 0; // Default LED
+	private static int led = 3; // Default LED
 
 	/**
 	 * Constructor for Autocorrect uses Trie constructor

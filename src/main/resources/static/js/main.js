@@ -102,6 +102,7 @@ function paint(nodesJSON){
 	var nodesObject = JSON.parse(nodesJSON);
 	var edgeArr = nodesObject.shownEdges;
 	var pathArr = nodesObject.pathEdges;
+	canvas.getContext("2d").clearRect(0, 0, canvasSize, canvasSize);
 	for (i = 0; i < edgeArr.length; i++){
 		paint_helper(
 				(edgeArr[i][0] - latitude   + size/2) * (canvasSize/size), 
@@ -160,6 +161,39 @@ canvas.addEventListener('mousewheel', function(event){
 	updateNodes();
 	return false;
 }, false);
+
+function clearStart() {
+	   // Get the first form with the name
+	   var frm = document.getElementsByName('start')[0];
+	   frm.reset();  // Reset
+	   return false; // Prevent page refresh
+};
+
+function submitStart() {
+	   // Get the first form with the name
+	   var frm = document.getElementsByName('start')[0];
+	   
+	   frm.reset();  // Reset
+	   return false; // Prevent page refresh
+};
+
+function clearDestination() {
+	   // Get the first form with the name
+	   var frm = document.getElementsByName('start')[0];
+	   frm.reset();  // Reset
+	   return false; // Prevent page refresh
+};
+
+function submitDestination() {
+	   // Get the first form with the name
+	   var frm = document.getElementsByName('start')[0];
+	   
+	   var postParameters = {first_street : input1, second_street : input2};
+		$.post("/findIntersection", postParameters, setLocationStart);
+	   frm.reset();  // Reset
+	   return false; // Prevent page refresh
+};
+
 /*
 submit.addEventListener("click", shortestPath);
 
