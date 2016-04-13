@@ -9,6 +9,8 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
+
+import edu.brown.cs.azhang6.autocorrect.Trie;
 import edu.brown.cs.azhang6.db.Database;
 import edu.brown.cs.azhang6.dimension.Dimensional;
 import edu.brown.cs.azhang6.dimension.DimensionalDistance;
@@ -169,7 +171,9 @@ public class Main {
      * Sets up trie.
      */
     private void setupAutocorrect() {
-
+    	
+    	Trie singleWord = new Trie(some collection);
+    	Trie streetName = new Trie(some collection);
     }
 
     /**

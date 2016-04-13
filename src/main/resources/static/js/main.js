@@ -1,7 +1,7 @@
 var latitude = 41.8268;
 var longtitude = -71.4025;
 var size = .001; // number of shown latitude
-var shownNodes;
+var pathEdges;
 var canvas = $("#map");
 var canvasSize = $("#map").height;
 var submit = $("#submit");
@@ -10,17 +10,16 @@ udpdateShownNodes();
 var mouseDownX;
 var mouseDonwY;
 
-var start;
-var finish;
+var start_lat;
+var start_lng;
+var start_id;
+var finish_lat;
+var finish_lng;
+var finish_id;
 
 function updateShownNodes() {
 	var postParameters = {lat : latiude, lon : longitude, s : size}
-		$.post("/getNodes", postParameters, setNodes);
-};
-
-function setNdoes(nodesJSON){
-	var nodesObject = JSON.parse(nodesJSON);
-	shownNodes = $.map(nodesObject, function(e) {return e;});
+		$.post("/getNodes", postParameters, paint);
 };
 
 map.addEventListener("mousedown", function(event){
@@ -31,7 +30,6 @@ map.addEventListener("mousedown", function(event){
 map.addEventListener('mousewheel', function(event){
 	size = size + 0.00000833333*event.originalEvent.wheelDelta;
 	updateShownNodes();
-	repaint();
 	return false;
 }, false);
 
@@ -50,14 +48,16 @@ map.addEventListener("mouseup", function(event){
 
 function setLocationStart(nodesJSON){
 	var nodesObject = JSON.parse(nodesJSON);
-	locationArr = $.map(nodesObject, function(e){return e;});
-	start = locaitonArr[0];
+	start_lat = nodesObject.lat;
+	start_lng = nodesObject.lng;
+	start_id  = nodesObject.id;
 };
 
 function setLocationFinish(nodesJSON){
 	var nodesObject = JSON.parse(nodesJSON);
-	locationArr = $.map(nodesObject, function(e){return e;});
-	finish = locationArr[0];
+	finish_lat = nodesObject.lat;
+	finsih_lng = nodesObject.lng;
+	finish_id  = nodesObject.id;
 };
 
 
@@ -88,46 +88,48 @@ setInterval(repaint, 5000);
 
 function shortestPath(){
 	if(start == null || finish == null){
-		var postParameters = {s : start, f : finish};
-		$.post("/shortestPath", postParameters, route);
+		var postParameters = {start_id : start_id, finish_id : finish_id};
+		$.post("/shortestPath", postParameters, paint);
 	}
 };
 
 function route(nodesJSON){
-	var nodesObject = JSON.parse(nodesJSON);
-	var optimalRouteArr = $.map(nodesObject, function(e){return e;});
+	pathEdges = JSON.parse(nodesJSON);
 	// How are we going to display the route 
 	// routeRepaint();???
 };
 
 
 function repaint(){
-	var postParameters = {lat : latiude, lon : longitude, s : size, nodes : shownNodes};
+	var postParameters = {lat : latiude, lon : longitude, s : size};
 	$.post("/getEdges", postParameters, paint);
 };
 
 function paint(nodesJSON){
 	var nodesObject = JSON.parse(nodesJSON);
-	var edgeArr = $.map(nodesObject, function(e){return e;});
-	var endpoints;
-	var vertex1;
-	var vertex2;
+	var edgeArr = nodesObject.shownEdges;
+	var pathArr = nodesObject.pathEdges;
+	
 	for (i = 0; i < edgeArr.length; i++){
-		endpoints = edgeArr[i].getEndpoints();
-		vertex1 = endpoints.s().getLat();
-		vertex2 = endpoints.t().getLng;
-		
-		paint_helper(vertex1.getLat() * (canvasSize/size)/latitude, 
-				vertex1.getLng() * (canvasSize/size)/longitude, 
-				vertex2.getLat() * (canvasSize/size)/latitude,
-				vertex2.getLng() * (canvasSize/size)/longitude, 
-				edgeArr[i].getWeight()
-				);
-		}	
+		paint_helper(
+				(edgeArr[i][0] - latitude   + size/2) * (canvasSize/size), 
+				(edgeArr[i][1] - longitutde + size/2) * (canvasSize/size), 
+				(edgeArr[i][2] - latitude   + size/2) * (canvasSize/size), 
+				(edgeArr[i][3] - longitudue + size/2) * (canvasSize/size), 
+				 edgeArr[i][4]);
+	}
+	
+	for(j = 0; j < pathArr.length; j++){
+		paint_helper_path(
+				(pathArr[i][0] - latitude   + size/2) * (canvasSize/size), 
+				(pathArr[i][1] - longitutde + size/2) * (canvasSize/size), 
+				(pathArr[i][2] - latitude   + size/2) * (canvasSize/size), 
+				(pathArr[i][3] - longitudue + size/2) * (canvasSize/size), 
+				 pathArr[i][4]);
 	}
 };
 
-function paint_helper(x1, y1, x2, y2, weight){
+function paint_helper(x1, y2, x1, y2, weight){
 	var c = map.getElementById("myCanvas");
 	var ctx = c.getContext("2d");
 	ctx.beginPath();
@@ -136,6 +138,23 @@ function paint_helper(x1, y1, x2, y2, weight){
 	if(weight > 40){
 		ctx.fillStyle="#FF0000";
 	} else if(weight > 20){
+		ctx.fillStyle="#FFFF00";
+	} else{
+		ctx.fillStyle="#00FF00";
+	}
+	ctx.stroke();
+};
+
+function paint_helper_path(x1, y2, x1, y2, weight){
+	var c = map.getElementById("myCanvas");
+	var ctx = c.getContext("2d");
+	ctx.beginPath();
+	ctx.moveTo(x1, y1);
+	ctx.lineTo(x2, y2);
+	ctx.
+	if(weight > 5){
+		ctx.fillStyle="#FF0000";
+	} else if(weight > 2){
 		ctx.fillStyle="#FFFF00";
 	} else{
 		ctx.fillStyle="#00FF00";
