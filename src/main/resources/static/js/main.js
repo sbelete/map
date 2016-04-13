@@ -100,9 +100,37 @@ function repaint(){
 
 function paint(nodesJSON){
 	var nodesObject = JSON.parse(nodesJSON);
-	var edgeArr = nodesObject.shownEdges;
-	var pathArr = nodesObject.pathEdges;
+	// var edgeArr = nodesObject.shownEdges;
+	// var pathArr = nodesObject.pathEdges;
+
+	// Array of 2-element arrays: first is ID, second is traffic
+	var oldEdges = nodesObject.oldEdges;
+	// Array of 2-element arrays: first is ID, second is traffic
+	var newEdges = nodesObject.newEdges;
+	// Array of 4-element arrays: lat/lng of start/end
+	var newCoords = nodesObject.newCoords;
+	// Array of 2-element arrays: first is ID, second is traffic
+	var pathEdges = nodesObject.pathEdges;
 	canvas.getContext("2d").clearRect(0, 0, canvasSize, canvasSize);
+
+	for (int i = 0; i < oldEdges.length; i++) {
+		var coords = cache[oldEdges[i][0]];
+		var traffic = oldEdges[i][1];
+		paintCoordsTraffic(coords, traffic, 1);
+	}
+	for (int i = 0; i < newEdges.length; i++) {
+		var coords = newCoords[i];
+		cache[newEdges[i][0]] = coords;
+		var traffic = newEdges[i][1];
+		paintCoordsTraffic(coords, traffic, 1);
+	}
+	for (int i = 0; i < pathEdges.length; i++) {
+		var coords = cache[pathEdges[i][0]];
+		var traffic = pathEdges[i][1];
+		paintCoordsTraffic(coords, traffic, 3);
+	}
+
+	/*
 	for (i = 0; i < edgeArr.length; i++){
 		paint_helper(
 				(edgeArr[i][0] - latitude   + size/2) * (canvasSize/size), 
@@ -120,8 +148,37 @@ function paint(nodesJSON){
 				(pathArr[i][3] - longitude + size/2) * (canvasSize/size), 
 				 pathArr[i][4]);
 	}
+*/
 };
 
+// Paints an edge with the given coordinates array and traffic value
+function paintCoordsTraffic(coords, traffic, lineWidth) {
+	paint_helper(
+		(coords[0] - latitude   + size/2) * (canvasSize/size),
+		(coords[1] - longitude + size/2) * (canvasSize/size), 
+		(coords[2] - latitude   + size/2) * (canvasSize/size), 
+		(coords[3] - longitude + size/2) * (canvasSize/size), 
+		traffic, lineWidth);
+}
+
+function paint_helper(y1, x1, y2, x2, weight, lineWidth) {
+	var c = canvas
+	var ctx = c.getContext("2d");
+	ctx.beginPath();
+	ctx.lineWidth=lineWidth;
+	ctx.moveTo(x1, y1);
+	ctx.lineTo(x2, y2);
+	if(weight > 5){
+		ctx.strokeStyle="#FF0000";
+	} else if(weight > 2){
+		ctx.strokeStyle="#FFFF00";
+	} else{
+		ctx.strokeStyle="#00FF00";
+	}
+	ctx.stroke();
+}
+
+/*
 function paint_helper(y1, x1, y2, x2, weight){
 	var c = canvas
 	var ctx = c.getContext("2d");
@@ -155,6 +212,7 @@ function paint_helper_path(y1, x1, y2, x2, weight){
 	}
 	ctx.stroke();
 };
+*/
 
 canvas.addEventListener('mousewheel', function(event){
 	size = size + 0.00000833333*event.originalEvent.wheelDelta;
