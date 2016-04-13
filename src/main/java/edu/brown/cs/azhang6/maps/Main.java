@@ -9,15 +9,17 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
-
-import edu.brown.cs.azhang6.autocorrect.Trie;
 import edu.brown.cs.azhang6.db.Database;
 import edu.brown.cs.azhang6.dimension.Dimensional;
 import edu.brown.cs.azhang6.dimension.DimensionalDistance;
 import edu.brown.cs.azhang6.dimension.LatLng;
+import edu.brown.cs.azhang6.graph.Edge;
+import edu.brown.cs.azhang6.graphs.Graphs;
+import edu.brown.cs.azhang6.graphs.Walk;
 import edu.brown.cs.azhang6.kdtree.KDNode;
 import edu.brown.cs.azhang6.kdtree.KDVertex;
 import edu.brown.cs.azhang6.kdtree.LatLngKDTree;
+import edu.brown.cs.azhang6.pair.OrderedPair;
 import freemarker.template.Configuration;
 import java.nio.charset.IllegalCharsetNameException;
 import java.sql.PreparedStatement;
@@ -69,6 +71,31 @@ public class Main {
      * KD-tree.
      */
     private KDVertex<Node> nodes;
+    
+    /**
+     * Latitude of center of screen.
+     */
+    private double lat;
+    
+    /**
+     * Longitude of center of screen.
+     */
+    private double lng;
+    
+    /**
+     * Size of screen in terms of degrees latitude.
+     */
+    private double size;
+    
+    /**
+     * Edges shown on screen.
+     */
+    private double[][] shownEdges;
+    
+    /**
+     * Edges shown on screen that are part of a shortest path.
+     */
+    private double[][] pathEdges;
 
     /**
      * Runs application with command line arguments.
@@ -171,9 +198,7 @@ public class Main {
      * Sets up trie.
      */
     private void setupAutocorrect() {
-    	
-    	Trie singleWord = new Trie(some collection);
-    	Trie streetName = new Trie(some collection);
+
     }
 
     /**
@@ -202,6 +227,9 @@ public class Main {
         Spark.post("/shortestPath", new ShortestPathHandler());
         // Get edges to display
         Spark.post("/getEdges", new GetEdgesHandler());
+        // Clear shortest path
+        Spark.post("/clear", new ClearHandler());
+        Spark.post("/findIntersection", new FindIntersectionHandler());
     }
 
     /**
@@ -265,20 +293,23 @@ public class Main {
          */
         @Override
         public Object handle(final Request req, final Response res) {
-            /*
-             TODO
-             */
             QueryParamsMap qm = req.queryMap();
-            double latitude = Double.parseDouble(qm.value("lat"));
-            double longitude = Double.parseDouble(qm.value("lon"));
-            List<DimensionalDistance<Node>> nearestNeighbors
-                = nodes.nearestNeighbors(new LatLng(latitude, longitude), 1, null);
-            Node nearestNeighbor = nearestNeighbors.get(0).getDimensional();
+            String startId = qm.value("start_id");
+            String endId = qm.value("end_id");
+            Node startNode = Node.of(startId);
+            Node endNode = Node.of(endId);
+            OrderedPair<Walk<Node, Way>, Double> shortestPath =
+                Graphs.dijkstra(startNode, n -> endNode.equals(n));
+            List<Edge<Node, Way>> edges = shortestPath.first().getEdges();
+            pathEdges = new double[edges.size()][2];
+            /*
+            TODO: fill in pathEdges
+            */
 
             // Send latitude and longitude of nearest neighbor
             Map<String, Object> variables
-                = ImmutableMap.of("lat", nearestNeighbor.getLat(),
-                    "lng", nearestNeighbor.getLng());
+                = ImmutableMap.of("shownEdges", shownEdges,
+                    "pathEdges", pathEdges);
             return GSON.toJson(variables);
         }
     }
@@ -308,18 +339,17 @@ public class Main {
             List<Node> displayedNodes = withinRadius.stream()
                 .map(dd -> dd.getDimensional())
                 .filter(ll -> box.contains(ll)).collect(Collectors.toList());
+            // Get all edges that should be displayed
+            List<Edge<Node, Way>> displayedEdges = new ArrayList<>();
+            displayedNodes.forEach(node -> displayedEdges.addAll(node.getDWEdges()));
             /*
-            TODO
+            TODO make it return object with shownEdges and pathEdges
             */
-            
-            List<DimensionalDistance<Node>> nearestNeighbors
-                = nodes.nearestNeighbors(new LatLng(latitude, longitude), 1, null);
-            Node nearestNeighbor = nearestNeighbors.get(0).getDimensional();
 
             // Send latitude and longitude of nearest neighbor
             Map<String, Object> variables
-                = ImmutableMap.of("lat", nearestNeighbor.getLat(),
-                    "lng", nearestNeighbor.getLng());
+                = ImmutableMap.of("shownEdges", shownEdges,
+                    "pathEdges", pathEdges);
             return GSON.toJson(variables);
         }
     }
@@ -330,7 +360,6 @@ public class Main {
     private static class LatLngSize {
 
         // Latitude, longitude, and size
-
         private final double lat;
         private final double lng;
         private final double size;
@@ -350,7 +379,7 @@ public class Main {
          * @param lng longitude
          * @param size size (degrees latitude)
          */
-        LatLngSize(double lat, double lng, double size) {
+        private LatLngSize(double lat, double lng, double size) {
             this.lat = lat;
             this.lng = lng;
             this.size = size;
@@ -374,7 +403,7 @@ public class Main {
          * @param point LatLng
          * @return whether point is contained in this region
          */
-        boolean contains(LatLng point) {
+        private boolean contains(LatLng point) {
             return containsHelper(point) || containsHelper(wrapped(point));
         }
 
@@ -384,7 +413,7 @@ public class Main {
          * @param point LatLng
          * @return whether point is contained in this region
          */
-        boolean containsHelper(LatLng point) {
+        private boolean containsHelper(LatLng point) {
             return point.getLat() >= minLat
                 && point.getLat() <= maxLat
                 && point.getLng() >= minLng
@@ -407,6 +436,42 @@ public class Main {
                 return (LatLng) original.withCoordinate(1, originalLng + 360);
             }
             return original;
+        }
+    }
+    
+    /**
+     * Handler for /clear.
+     */
+    private class ClearHandler implements Route {
+        
+        /**
+         * TODO.
+         * 
+         * @param req
+         * @param res
+         * @return 
+         */
+        @Override
+        public Object handle(final Request req, final Response res) {
+            return null;
+        }
+    }
+    
+    /**
+     * Handler for /findIntersection.
+     */
+    private class FindIntersectionHandler implements Route {
+        
+        /**
+         * TODO.
+         * 
+         * @param req
+         * @param res
+         * @return 
+         */
+        @Override
+        public Object handle(final Request req, final Response res) {
+            return null;
         }
     }
 
@@ -437,9 +502,6 @@ public class Main {
          */
         private static final int STATUS = 500;
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public void handle(Exception e, Request req, Response res) {
             res.status(STATUS);
