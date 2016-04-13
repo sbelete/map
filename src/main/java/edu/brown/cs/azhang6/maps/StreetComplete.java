@@ -10,8 +10,9 @@ import java.util.Set;
 import edu.brown.cs.azhang6.autocorrect.Autocorrect;
 import edu.brown.cs.azhang6.autocorrect.Led;
 public class StreetComplete extends Autocorrect {
-
-	public StreetComplete(Collection<String> words) {
+	Autocorrect street;
+	Autocorrect words;
+	public StreetComplete(Collection<String> words, Collection<String> streets) {
 		super(words);
 		setLed(3);
 		useWhitespace = true;

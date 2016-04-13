@@ -7,6 +7,7 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import edu.brown.cs.azhang6.db.Database;
@@ -198,12 +199,11 @@ public class Main {
      * Sets up trie.
      */
     private void setupAutocorrect() {
-<<<<<<< Updated upstream
 
-=======
     	try (PreparedStatement prep = db.getConn().prepareStatement(
                 "SELECT name FROM way;")) {
-                List<String> collection = new ArrayList<>();
+                List<String> streets = new ArrayList<>();
+                
                 db.query(prep, rs -> {
                     try {
                         while (rs.next()) {
@@ -213,11 +213,14 @@ public class Main {
                         throw new RuntimeException(e);
                     }
                 });
+                
+                StreetComplete corrector = new StreetComplete(streets);
+                
                 nodes = new LatLngKDTree<>(new KDNode<>(nodesToAdd, 0));
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
->>>>>>> Stashed changes
+
     }
 
     /**
@@ -249,6 +252,8 @@ public class Main {
         // Clear shortest path
         Spark.post("/clear", new ClearHandler());
         Spark.post("/findIntersection", new FindIntersectionHandler());
+        // Autocorrect (Streetcorrect)
+        Spark.post("/auto", new AutocorrectHandler());
     }
 
     /**
@@ -369,6 +374,29 @@ public class Main {
             Map<String, Object> variables
                 = ImmutableMap.of("shownEdges", shownEdges,
                     "pathEdges", pathEdges);
+            return GSON.toJson(variables);
+        }
+    }
+    
+    private class AutocorrectHandler implements Route {
+
+        /**
+         * Gets shortest path.
+         *
+         * @param req request containing a street name
+         * @param res unused
+         * @return shortest path
+         */
+        @Override
+        public Object handle(final Request req, final Response res) {
+            QueryParamsMap qm = req.queryMap();
+            String streetName = qm.value("street_name");
+            List<String> suggestions = corrector.suggestions(streetName);
+
+            // Send latitude and longitude of nearest neighbor
+            List<Object> variables
+                = ImmutableList.of(suggestions.subList(0, 4));
+            
             return GSON.toJson(variables);
         }
     }
