@@ -594,7 +594,7 @@ public class Main {
             List<String> suggestions = corrector.suggest(streetName);
 
             List<Object> variables
-                = ImmutableList.of(suggestions.subList(0, 4));
+                = ImmutableList.of("list", suggestions.subList(0, 4));
 
             return GSON.toJson(variables);
         }

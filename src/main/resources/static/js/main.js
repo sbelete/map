@@ -26,21 +26,21 @@ repaint();
 function setLocationStart(nodesJSON){
 	var nodesObject = JSON.parse(nodesJSON);
 	
-	if(nodesObject.id != null){
+	if(nodesObject.id != ""){
 		start_lat = nodesObject.lat;
 		start_lng = nodesObject.lng;
 		start_id  = nodesObject.id;
 	} else {
 		start_id = null;
 		start_lng = null;
-		start_id  = null;
+		start_lat  = null;
 	}
 };
 
 function setLocationFinish(nodesJSON){
 	var nodesObject = JSON.parse(nodesJSON);
 	
-	if(nodesObject.id != null){
+	if(nodesObject.id != ""){
 		finish_lat = nodesObject.lat;
 		finish_lng = nodesObject.lng;
 		finish_id  = nodesObject.id;
@@ -295,7 +295,7 @@ function getSuggestions1() {
 function showSuggestions1(suggestionsJSON) {
     // Get the suggestions list
     var suggestionsObject = JSON.parse(suggestionsJSON);
-    var suggestions = $.map(suggestionsObject, function(e) {return e;});
+    var suggestions = suggestionsObject.list;
 
     // First, disable and clear all boxes
     clearSuggestions1();
