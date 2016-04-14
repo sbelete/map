@@ -60,7 +60,7 @@ function setLocationFinish(nodesJSON){
 
 function mouseDrag(deltaX, deltaY){
 	latitude = latitude + (deltaY/canvasSize) * size;
-	var degreeLong = size * 110.574 / (111.320 * cos(latitude));
+	var degreeLong = size * 110.574 / (111.320 * Math.cos(latitude));
 	longitude = longitude + (deltaX/canvasSize) * degreeLong;
 	
 	updateNodes();
@@ -114,7 +114,7 @@ function paint(nodesJSON){
 	// Array of 2-element arrays: first is ID, second is traffic
 	var pathEdges = nodesObject.pathEdges;
 	canvas.getContext("2d").clearRect(0, 0, canvasSize, canvasSize);
-
+	
 	for (int i = 0; i < oldEdges.length; i++) {
 		var coords = cache[oldEdges[i][0]];
 		var traffic = oldEdges[i][1];
@@ -220,7 +220,7 @@ function paint_helper_path(y1, x1, y2, x2, weight){
 */
 
 canvas.addEventListener('mousewheel', function(event){
-	size = size + 0.00000833333*event.originalEvent.wheelDelta;
+	size = size + 0.00000833333*event.wheelDelta;
 	updateNodes();
 	return false;
 }, false);
