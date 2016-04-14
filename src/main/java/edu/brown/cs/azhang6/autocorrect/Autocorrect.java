@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 public class Autocorrect extends Trie {
-	private static int led = 0; // Default LED
+	private static int led = 3; // Default LED
 
 	/**
 	 * Constructor for Autocorrect uses Trie constructor
@@ -184,7 +184,7 @@ public class Autocorrect extends Trie {
 	public List<String> suggest(String word) {
 		// Comparator for how to sort suggestions
 		Comparator<? super String> comp = null;
-		word = word.toLowerCase().trim();
+		word = word.trim();
 
 		Set<String> suggestions = new HashSet<String>();
 		if (contains(word)) {
