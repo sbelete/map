@@ -191,11 +191,8 @@ public class Autocorrect extends Trie {
 			suggestions.add(word);
 		}
 
-		if (useAutocomplete)
 			suggestions.addAll(autocomplete(word));
-		if (led > 0)
 			suggestions.addAll(suggestLed(word));
-		if (useWhitespace)
 			suggestions.addAll(whitespace(word));
 
 		comp = new Led(word);
