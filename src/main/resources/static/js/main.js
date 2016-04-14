@@ -168,9 +168,9 @@ function clearStart() {
 	   var frm = document.getElementsById('start')[0];
 	   frm.reset();  // Reset
 	   $.post("/clear", {}, paint);
-	   finish_id = null;
-	   finish_lat = null;
-	   finihs_lng = null;
+	   start_id = null;
+	   start_lat = null;
+	   start_lng = null;
 	   paintEnter(false);
 	   return false; // Prevent page refresh
 };
@@ -190,7 +190,7 @@ function clearDestination() {
 	   $.post("/clear", {}, paint);
 	   finish_id = null;
 	   finish_lat = null;
-	   finihs_lng = null;
+	   finish_lng = null;
 	   paintEnter(false);
 	   return false; // Prevent page refresh
 };
