@@ -2,6 +2,8 @@ var latitude = 41.8268;
 var longitude = -71.4025;
 var size = .001; // number of shown latitude
 
+var MAX_SIZE = .01;
+var MIN_SIZE = .0005;
 var canvas = $("#map")[0];
 var canvasSize = canvas.height;
 var submit = $("#submit")[0];
@@ -62,6 +64,7 @@ function mouseDrag(deltaX, deltaY){
 	latitude = latitude + (deltaY/canvasSize) * size;
 	var degreeLong = size * 110.574 / (111.320 * Math.cos(latitude));
 	longitude = longitude + (deltaX/canvasSize) * degreeLong;
+
 	repaint();
 };
 
@@ -215,7 +218,12 @@ function paint_helper_path(y1, x1, y2, x2, weight){
 */
 
 canvas.addEventListener('mousewheel', function(event){
-	size = size + 0.00000833333*event.wheelDelta;
+	var temp = size - 0.00000833333*event.wheelDelta;
+	
+	if(temp < MAX_SIZE || temp > MIN_SIZE){
+		size = temp;
+	}
+	
 	repaint();
 	return false;
 }, false);
