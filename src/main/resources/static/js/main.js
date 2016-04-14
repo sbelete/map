@@ -76,23 +76,35 @@ function textEnter1(){
 	$.post("/findIntersection", postParameters, setLocationStart);
 };
 
-function clearStart() {
+function clearText1() {
 	   // Get the first form with the name
 		input1[0].value = "";
-	   var frm = document.getElementsById('start')[0];
-	   frm.reset();  // Reset
+		input2[0].value = "";
+	 
 	   $.post("/clear", {}, paint);
 	   start_id = null;
 	   start_lat = null;
 	   start_lng = null;
-	   paintEnter(false);
-	   return false; // Prevent page refresh
+	   repaint();
 };
 
 function textEnter2(){
 	var postParameters = {first_street :input3[0].value, second_street : input4[0].value};
 	$.post("/findIntersection", postParameters, setLocationFinish);
 };
+
+function clearText2() {
+	   // Get the first form with the name
+		input3[0].value = "";
+		input4[0].value = "";
+	 
+	   $.post("/clear", {}, paint);
+	   finsih_id = null;
+	   finish_lat = null;
+	   finsih_lng = null;
+	   repaint();
+};
+
 
 function shortestPath(){
 	if(start_id != null || finish_id != null){
