@@ -282,7 +282,10 @@ var highlightedColor = "orange";
 
 // When the input text box is updated, get suggestions
 input1.on("keyup", getSuggestions1);
-
+input1.keyup(function(e){
+    console.log(e);
+    $('#autocomplete1').val($(this).val() + 'asdf')
+});
 // Makes a post request to get suggestions for input
 function getSuggestions1() {
     var postParameters = {input: input1[0].value, on: true};
