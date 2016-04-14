@@ -107,7 +107,7 @@ public class Main {
     /**
      * KD-tree parallel level, for efficiency.
      */
-    private static final int KD_TREE_PARALLEL_LEVEL = 4;
+    private static final int KD_TREE_PARALLEL_LEVEL = 3;
 
     /**
      * Used in REPL: if input has no quotes, it splits into this many pieces.
@@ -118,6 +118,17 @@ public class Main {
      * Used in REPL: if input has quotes, it splits into this many pieces.
      */
     private static final int PIECES_QUOTES = 8;
+    
+    /**
+     * Fail limit for Dijkstra search.  Prevents searching too many nodes if
+     * start and end are disconnected.
+     */
+    private static final double DIJKSTRA_FAIL = 10;
+    
+    /**
+     * Maximum number of vertices to search in Dijkstra.
+     */
+    private static final int DIJKSTRA_MAX_VERTICES = 5000;
 
     /**
      * Autocorrect.
@@ -365,8 +376,9 @@ public class Main {
                     continue;
                 }
                 OrderedPair<Walk<Node, Way>, Double> shortestPath
-                    = Graphs.dijkstraAStar(start, n -> n.equals(end),
-                        n -> n.tunnelDistanceTo(end));
+                    = Graphs.dijkstraAStarFail(start, n -> n.equals(end),
+                        n -> n.tunnelDistanceTo(end),
+                        DIJKSTRA_FAIL, DIJKSTRA_MAX_VERTICES);
                 System.out.println(
                     formatOutput(shortestPath, "\n", start.getId(), end.getId()));
             }
@@ -417,8 +429,21 @@ public class Main {
      * Runs gui.
      */
     private void runSparkServer() {
-        setupKDTree();
-        //setupAutocorrect();
+        Thread kdThread = new Thread(() -> {
+            setupKDTree();
+        });
+        kdThread.start();
+        Thread autoThread = new Thread(() -> {
+            setupAutocorrect();
+        });
+        //autoThread.start();
+        try {
+            kdThread.join();
+            //autoThread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(
+                "interrupted while setting up kdtree and autocorrect", e);
+        }
 
         // Setup Spark
         Spark.externalStaticFileLocation("src/main/resources/static");
@@ -455,6 +480,7 @@ public class Main {
          */
         @Override
         public ModelAndView handle(Request req, Response res) {
+            sentWays.clear();
             oldEdges.clear();
             newEdges.clear();
             newCoords.clear();
@@ -524,9 +550,13 @@ public class Main {
             Node endNode = Node.of(endId);
             OrderedPair<Walk<Node, Way>, Double> shortestPath;
             synchronized (traffic) {
-                shortestPath = Graphs.dijkstraAStar(startNode, n -> endNode.equals(n),
-                    n -> n.tunnelDistanceTo(endNode));
+                shortestPath = Graphs.dijkstraAStarFail(
+                    startNode, n -> endNode.equals(n),
+                    n -> n.tunnelDistanceTo(endNode),
+                    DIJKSTRA_FAIL, DIJKSTRA_MAX_VERTICES);
             }
+            if (shortestPath != null) {
+            
             System.out.println("found a shortest path of length: " + shortestPath.second());
 
             // Send information about shortest path
@@ -536,6 +566,12 @@ public class Main {
             oldEdges.addAll(newEdges);
             newEdges.clear();
             newCoords.clear();
+            } else {
+                oldEdges.addAll(newEdges);
+                newEdges.clear();
+                newCoords.clear();
+                pathEdges.clear();
+            }
             Map<String, Object> variables = ImmutableMap.of(
                 "oldEdges", oldEdges,
                 "newEdges", newEdges,

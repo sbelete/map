@@ -1,13 +1,11 @@
 package edu.brown.cs.azhang6.db;
 
-import edu.brown.cs.azhang6.maps.Main;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -142,9 +140,6 @@ public class Database implements AutoCloseable {
         if (!availableConnections.isEmpty()) {
             // If there are available connections
             Connection returned = availableConnections.get(0);
-            if (Main.done) {
-                System.out.println("returned0: " + returned);
-            }
             availableConnections.remove(returned);
             usedConnections.add(returned);
             return returned;
@@ -153,9 +148,6 @@ public class Database implements AutoCloseable {
             try {
                 Connection returned =
                     DriverManager.getConnection("jdbc:sqlite:" + db);
-                if (Main.done) {
-                    System.out.println("returned1: " + returned);
-                }
                 usedConnections.add(returned);
                 return returned;
             } catch (SQLException e) {
@@ -176,12 +168,11 @@ public class Database implements AutoCloseable {
     }
     
     /**
-     * Returns the connection used by this thread.
+     * Returns connection to pool of available connections.
+     * 
+     * @param toReturn connection to return
      */
     public synchronized void returnConnection(Connection toReturn) {
-        if (Main.done) {
-            System.out.println("toReturn: " + toReturn);
-        }
         usedConnections.remove(toReturn);
         availableConnections.add(toReturn);
         notifyAll();

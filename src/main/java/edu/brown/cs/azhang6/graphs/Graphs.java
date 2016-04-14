@@ -243,6 +243,71 @@ public final class Graphs {
     // Return null if the start and end are disconnected
     return null;
   }
+      
+      /**
+   * Same as the normal A* version, but fails if the next vertex to check is too
+   * far or if too many vertices have been searched.
+   *
+   * @param <V> type of vertex value
+   * @param <E> type of edge value
+   * @param <T> vertex type
+   * @param root start vertex
+   * @param stop stop condition
+   * @param heuristic heuristic on vertices
+   * @param failLimit distance fail limit
+   * @param maxVertices max number of vertices to check
+   * @return minimum-weight walk from start to end, or null if no such walk
+   */
+  public static <V, E, T extends WVertex<V, E>> OrderedPair<Walk<V, E>, Double>
+      dijkstraAStarFail(T root, Predicate<T> stop,
+          ToDoubleFunction<? super T> heuristic, double failLimit, int maxVertices) {
+    // Same idea as dijkstra, but include the heuristic
+    if (stop.test(root)) {
+      return new OrderedPair<>(new Walk.Builder<>(root).build(), 0D);
+    }
+    HashMap<T, OrderedPair<Double, DijkstraEdgeAStar<V, E, T>>> visited
+        = new HashMap<>();
+    visited.put(root, new OrderedPair(0, null));
+    // Get the fail limit
+    double fail = failLimit * heuristic.applyAsDouble(root);
+    // Here, the edges are sorted by total weight including heuristic
+    PriorityQueue<DijkstraEdgeAStar<V, E, T>> edges = new PriorityQueue<>();
+    for (WEdge<V, E> we : root.getWEdges()) {
+      edges.add(new DijkstraEdgeAStar<>(
+          we, (T) we.getWEndpoints().not(root), we.getWeight(), heuristic));
+    }
+
+    // Again, keep checking the outgoing edge of least weight
+    while (!edges.isEmpty()) {
+      DijkstraEdgeAStar<V, E, T> e = edges.poll();
+      // Check if we should fail
+      if (e.getHeuristicWeight() > fail || visited.size() > maxVertices) {
+          return null;
+      }
+      T dest = e.getHead();
+      if (visited.keySet().contains(dest)) {
+        continue;
+      }
+      double newWeight = e.getTotalWeight();
+      if (stop.test(dest)) {
+        Walk.Builder builder = new Walk.Builder(dest);
+        while (e != null) {
+          builder.addEdgeVertex(e, e.getTail());
+          e = visited.get(e.getTail()).second();
+        }
+        return new OrderedPair<>(builder.reverse().build(), newWeight);
+      }
+      visited.put(dest, new OrderedPair(newWeight, e));
+      for (WEdge<V, E> newEdge : dest.getWEdges()) {
+        edges.add(new DijkstraEdgeAStar(
+            newEdge, newEdge.getWEndpoints().not(dest),
+            newWeight + newEdge.getWeight(), heuristic));
+      }
+    }
+
+    // Return null if the start and end are disconnected
+    return null;
+  }
 
   /**
    * Dijkstra edge for the A* optimization.
