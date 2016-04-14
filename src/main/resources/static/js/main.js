@@ -107,7 +107,7 @@ function clearText2() {
 
 
 function shortestPath(){
-	if(start_id != null || finish_id != null){
+	if(start_id != null && finish_id != null){
 		var postParameters = {start_id : start_id, finish_id : finish_id};
 		$.post("/shortestPath", postParameters, paint);
 	}
@@ -204,7 +204,7 @@ function paint_helper(y1, x1, y2, x2, weight, lineWidth) {
 canvas.addEventListener('mousewheel', function(event){
 	var temp = size - 0.00000833333*event.wheelDelta;
 	
-	if(temp < MAX_SIZE || temp > MIN_SIZE){
+	if(temp < MAX_SIZE && temp > MIN_SIZE){
 		size = temp;
 	}
 	
