@@ -37,26 +37,19 @@ function setEndpoint(endpointObject, endpoint){
 
 function setLocationFinish(nodesJSON){
 	var nodesObject = JSON.parse(nodesJSON);
-	
+
 	if(nodesObject.id != ""){
-		finish_lat = nodesObject.lat;
-		finish_lng = nodesObject.lng;
-		finish_id  = nodesObject.id;
+		finish[1] = nodesObject.lat;
+		finish[2] = nodesObject.lng;
+		finish[0]  = nodesObject.id;
 	} else {
-		finish_lat = null;
-		finish_lng = null;
-		finish_id  = null;
+		finish[0] = null;
+		finish[1] = null;
+		finish[2]  = null;
 	}
 	repaint();
 };
-function toCartesian(xyz, l){
 
-};
-
-function toCoordinates(l, xyz){
-
-
-};
 
 function mouseDrag(deltaX, deltaY){
 	latitude = latitude + (-deltaY/canvasSize) * size;
@@ -69,7 +62,6 @@ function mouseDrag(deltaX, deltaY){
 function nearestNode(x, y){
 	var lon = x*(size/canvasSize) - size/2 + longitude;
 	var lat = (canvasSize - y)*(size/canvasSize) - size/2 + latitude;
-	
 
 	var postParameters = {lat : lat, lon: lon};
 	if(start[0] == null){
@@ -161,48 +153,23 @@ function repainter(nodesJSON){
 			paintCoordsTraffic(coords, traffic, 5);
 		}
 	}
-	
-	if(start[0] != null){
-		var c = canvas
-		var ctx = c.getContext("2d");
-		ctx.beginPath();
-		var x = (start[2] - longitude   + size/2) * (canvasSize/size);
-		var y = (start[1] - latitude   + size/2) * (canvasSize/size);
-		ctx.arc(x,canvasSize - y, 5,0,2*Math.PI);
-		ctx.fillStyle = 'blue';
-		ctx.fill();
-		ctx.stroke();
-	}
-	if(finish[0] != null){
-		var c2 = canvas
-		var ctx2 = c2.getContext("2d");
-		ctx2.beginPath();
-		var x2 = (finish[2] - longitude   + size/2) * (canvasSize/size);
-		var y2 = (finish[1] - latitude   + size/2) * (canvasSize/size);
-		ctx2.arc(x2,canvasSize - y2, 5,0,2*Math.PI);
-		ctx2.fillStyle = 'blue';
-		ctx2.fill();
-		ctx2.stroke();
-
-
 
 	if(start[0] != null){
 		drawEndpoint(start);
-
 	}
 
 	if(finish[0] != null){
 		drawEndpoint(finish);
-	} 
+	}
 };
 
 function drawEndpoint(endpoint) {
-	var x = (endpoint[1] - longitude   + size/2) * (canvasSize/size);
-	var y = (endpoint[0] - latitude   + size/2) * (canvasSize/size);
-	
+	var x = (endpoint[2] - longitude   + size/2) * (canvasSize/size);
+	var y = (endpoint[1] - latitude   + size/2) * (canvasSize/size);
+
 	var ctx = canvas.getContext("2d");
 	ctx.beginPath();
-	ctx.arc(x, y, 5, 0, 2*Math.PI);
+	ctx.arc(x,canvasSize - y, 5,0,2*Math.PI);
 	ctx.fillStyle = 'blue';
 	ctx.fill();
 	ctx.stroke();
@@ -217,7 +184,7 @@ function paintCoordsTraffic(coords, traffic, lineWidth) {
 		(coords[2] - latitude   + size/2) * (canvasSize/size),
 		(coords[3] - longitude + size/2) * (canvasSize/size),
 		traffic, lineWidth);
-}
+};
 
 function paint_helper(y1, x1, y2, x2, weight, lineWidth) {
 	var c = canvas
@@ -234,7 +201,7 @@ function paint_helper(y1, x1, y2, x2, weight, lineWidth) {
 		ctx.strokeStyle="#00FF00";
 	}
 	ctx.stroke();
-}
+};
 
 canvas.addEventListener('mousewheel', function(event){
 	var temp = size - 0.00000833333*event.wheelDelta;
@@ -258,7 +225,6 @@ canvas.addEventListener("mouseup", function(event){
 
 	if(deltaX == 0 && deltaY == 0){
 		var canvasBox = canvas.getBoundingClientRect();
-
 		nearestNode(mouseDown[0] - canvasBox.left, mouseDown[1] - canvasBox.top);
 
 	} else{
@@ -309,6 +275,7 @@ var boxes2 =
         $("#sug44"),
         $("#sug45")];
 
+/*
 // Color of a suggestion box that has a suggestion
 var suggestionColor = "white";
 // Color of a suggestion box that doesn't have a suggestion
@@ -557,6 +524,8 @@ function clearSuggestions4() {
     }
 }
 
+
+
 // Events for each suggestion box
 boxes4.forEach(function(box) {
     // At the beginning, the boxes have no suggestions
@@ -586,3 +555,4 @@ boxes4.forEach(function(box) {
         }
     });
 });
+*/

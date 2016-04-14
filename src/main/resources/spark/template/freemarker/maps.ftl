@@ -10,7 +10,12 @@
 
 <div id= "div1">
 Start Street 1: <input type="text" id ="streetS1" name="streetS1" value=""/><br><br>
-<!-- input id="autocomplete1" type="text" disabled="disabled" -->
+<button onclick="myFunction()" class="dropbtn">Dropdown</button>
+  <div id="myDropdown" class="dropdown-content">
+    <a href="#">Link 1</a>
+    <a href="#">Link 2</a>
+    <a href="#">Link 3</a>
+  </div>
 </div>
 
 <div id= "div2">

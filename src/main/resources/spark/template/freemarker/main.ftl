@@ -8,13 +8,8 @@
          avoid minification for clarity. -->
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/html5bp.css">
-     <link rel="stylesheet" href="css/jquery-ui.css">
     <link rel="stylesheet" href="css/main.css">
     
-    
-    <link href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/ui-darkness/jquery-ui.min.css" rel="stylesheet">
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
   </head>
   <body>
      ${content}
