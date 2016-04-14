@@ -63,7 +63,7 @@ public class Trie implements Collection<String> {
 		 * lowercase letters
 		 */
 		TrieNode() {
-			super(Character.LOWERCASE_LETTER, serialVersionUID);
+			super();
 		}
 
 		/**
@@ -188,7 +188,7 @@ public class Trie implements Collection<String> {
 	protected TrieNode getNode(String word) {
 		TrieNode node = base;
 
-		for (char c : word.toLowerCase().toCharArray()) {
+		for (char c : word.toCharArray()) {
 			node = node.get(c);
 
 			if (node == null) {
@@ -215,7 +215,7 @@ public class Trie implements Collection<String> {
 		TrieNode n = base;
 
 		// Adds word to Trie
-		for (char l : word.toLowerCase().toCharArray()) {
+		for (char l : word.toCharArray()) {
 
 			TrieNode next = n.get(l);
 

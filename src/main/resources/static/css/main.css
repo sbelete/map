@@ -32,6 +32,14 @@
 	background-color : red;
 }
 
+#word_maps {
+	position: absolute;
+	top :  10px;
+	left : 650px; 
+	font-size : 50px;
+}
+
+
 
 h1 {
     font-size: xx-large;

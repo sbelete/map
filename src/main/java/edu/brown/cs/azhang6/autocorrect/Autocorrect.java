@@ -184,7 +184,7 @@ public class Autocorrect extends Trie {
 	public List<String> suggest(String word) {
 		// Comparator for how to sort suggestions
 		Comparator<? super String> comp = null;
-		word = word.toLowerCase().trim();
+		word = word.trim();
 
 		Set<String> suggestions = new HashSet<String>();
 		if (contains(word)) {

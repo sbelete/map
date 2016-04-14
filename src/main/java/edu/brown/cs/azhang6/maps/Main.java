@@ -10,6 +10,8 @@ import java.util.Map;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
+
+import edu.brown.cs.azhang6.autocorrect.Autocorrect;
 import edu.brown.cs.azhang6.db.Database;
 import edu.brown.cs.azhang6.dimension.Dimensional;
 import edu.brown.cs.azhang6.dimension.DimensionalDistance;
@@ -116,7 +118,7 @@ public class Main {
     /**
      * Autocorrect.
      */
-    private StreetComplete corrector;
+    private Autocorrect corrector;
 
     /**
      * Edges shown on screen.
@@ -245,7 +247,7 @@ public class Main {
         try (PreparedStatement prep = db.getConn().prepareStatement(
             "SELECT name FROM way;")) {
             List<String> streets = db.query(prep);
-            corrector = new StreetComplete(streets, streets);
+            corrector = new Autocorrect(streets);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -393,7 +395,7 @@ public class Main {
      */
     private void runSparkServer() {
         setupKDTree();
-        //setupAutocorrect();
+        setupAutocorrect();
 
         // Setup Spark
         Spark.externalStaticFileLocation("src/main/resources/static");
