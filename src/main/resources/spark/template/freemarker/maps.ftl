@@ -6,7 +6,7 @@
 	<p><b>MAPS</b></p>
 </div>
 
-<div id= "forms">
+<div id= "textFields">
 
 <div id= "div1">
 Start Street 1: <input type="text" id ="streetS1" name="streetS1" value=""/><br><br>
