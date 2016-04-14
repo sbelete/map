@@ -30,8 +30,6 @@ function setLocationStart(nodesJSON){
 		start_lat = nodesObject.lat;
 		start_lng = nodesObject.lng;
 		start_id  = nodesObject.id;
-		
-		
 	} else {
 		start_id = null;
 		start_lng = null;
@@ -66,7 +64,7 @@ function nearestNode(x, y){
 	var lat = y*(size/canvasSize) - size/2 + latitude;
 	
 	var postParameters = {lat : latitude, lon: longitude};
-	if(start_id != null){
+	if(start_id == null){
 		$.post("/nearestNeighbor", postParameters, setLocationStart);
 	} else {
 		$.post("/nearestNeighbor", postParameters, setLocationFinish);
@@ -101,9 +99,9 @@ function clearText2() {
 		input4[0].value = "";
 	 
 	   $.post("/clear", {}, paint);
-	   finsih_id = null;
+	   finish = null;
 	   finish_lat = null;
-	   finsih_lng = null;
+	   finish_lng = null;
 	   repaint();
 };
 
