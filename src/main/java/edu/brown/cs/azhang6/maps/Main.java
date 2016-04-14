@@ -198,7 +198,7 @@ public class Main {
                             db.close();
                         }
                     } catch (Exception e) {
-                        System.out.println("ERROR:" + e.getMessage());
+                        System.out.println("ERROR: error closing database");
                     }
                 }));
                 // Make sure node and way proxies use the database
@@ -296,7 +296,7 @@ public class Main {
                     String[] splitByQuotes = line.split("\"");
                     if (splitByQuotes.length != PIECES_QUOTES) {
                         System.out.println(
-                            "Input incorrectly formatted: wrong number of quotes");
+                            "ERROR: wrong number of quotes");
                         continue;
                     }
                     piecesQuotes = new ArrayList<>();
@@ -308,7 +308,7 @@ public class Main {
                     String[] splitBySpaces = line.split(" ");
                     if (splitBySpaces.length != PIECES_NO_QUOTES) {
                         System.out.println(
-                            "Input incorrectly formatted: wrong number of spaces");
+                            "ERROR: wrong number of spaces");
                         continue;
                     }
                     piecesSpaces = new ArrayList<>();
@@ -317,7 +317,7 @@ public class Main {
                             piecesSpaces.add(Double.parseDouble(splitBySpaces[i]));
                         } catch (NumberFormatException e) {
                             System.out.println(
-                                "Input incorrectly formatted: can't parse coordinates");
+                                "ERROR: can't parse coordinates");
                             continue replLoop;
                         }
                     }
@@ -330,13 +330,13 @@ public class Main {
                     start = NodeProxy.atIntersection(
                         piecesQuotes.get(0), piecesQuotes.get(1));
                     if (start == null) {
-                        System.out.println("First two streets don't intersect");
+                        System.out.println("ERROR: first two streets don't intersect");
                         continue;
                     }
                     end = NodeProxy.atIntersection(
                         piecesQuotes.get(2), piecesQuotes.get(3));
                     if (end == null) {
-                        System.out.println("Last two streets don't intersect");
+                        System.out.println("ERROR: last two streets don't intersect");
                         continue;
                     }
                 } else {
@@ -350,7 +350,7 @@ public class Main {
 
                 // Find and print shortest path
                 if (start.equals(end)) {
-                    System.out.println("Start and end nodes are the same");
+                    System.out.println("ERROR: start and end nodes are the same");
                     continue;
                 }
                 OrderedPair<Walk<Node, Way>, Double> shortestPath
@@ -360,7 +360,7 @@ public class Main {
                     formatOutput(shortestPath, "\n", start.getId(), end.getId()));
             }
         } catch (IOException e) {
-            System.out.println("ERROR reading input");
+            System.out.println("ERROR: error reading input");
         }
     }
 
@@ -460,7 +460,7 @@ public class Main {
          * @return nearest neighbor
          */
         @Override
-        public Object handle(final Request req, final Response res) {
+        public synchronized Object handle(final Request req, final Response res) {
             // Find nearest neighbor
             QueryParamsMap qm = req.queryMap();
             double latitude = Double.parseDouble(qm.value("lat"));
@@ -491,7 +491,7 @@ public class Main {
          * @return shortest path
          */
         @Override
-        public Object handle(final Request req, final Response res) {
+        public synchronized Object handle(final Request req, final Response res) {
             // Find shortest path
             QueryParamsMap qm = req.queryMap();
             String startId = qm.value("start_id");
@@ -534,7 +534,7 @@ public class Main {
          * @return shortest path
          */
         @Override
-        public Object handle(final Request req, final Response res) {
+        public synchronized Object handle(final Request req, final Response res) {
             QueryParamsMap qm = req.queryMap();
             double latitude = Double.parseDouble(qm.value("lat"));
             double longitude = Double.parseDouble(qm.value("lon"));
@@ -588,7 +588,7 @@ public class Main {
          * @return autocorrect suggestions
          */
         @Override
-        public Object handle(final Request req, final Response res) {
+        public synchronized Object handle(final Request req, final Response res) {
             QueryParamsMap qm = req.queryMap();
             String streetName = qm.value("street_name");
             List<String> suggestions = corrector.suggest(streetName);
@@ -698,7 +698,7 @@ public class Main {
          * @return shown edges
          */
         @Override
-        public Object handle(final Request req, final Response res) {
+        public synchronized Object handle(final Request req, final Response res) {
             pathEdges.clear();
             oldEdges.addAll(newEdges);
             newEdges.clear();
@@ -726,7 +726,7 @@ public class Main {
          * @return intersection of two ways
          */
         @Override
-        public Object handle(final Request req, final Response res) {
+        public synchronized Object handle(final Request req, final Response res) {
             // Get intersection
             QueryParamsMap qm = req.queryMap();
             String way1Name = qm.value("first_street");
