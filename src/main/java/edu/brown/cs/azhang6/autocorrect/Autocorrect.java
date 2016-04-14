@@ -178,9 +178,6 @@ public class Autocorrect extends Trie {
 		return suggestions;
 	}
 
-	public boolean useWhitespace = false;
-	public boolean useAutocomplete = false;
-
 	public List<String> suggest(String word) {
 		// Comparator for how to sort suggestions
 		Comparator<? super String> comp = null;
@@ -190,12 +187,11 @@ public class Autocorrect extends Trie {
 		if (contains(word)) {
 			suggestions.add(word);
 		}
-
-		if (useAutocomplete)
+		
 			suggestions.addAll(autocomplete(word));
-		if (led > 0)
+	
 			suggestions.addAll(suggestLed(word));
-		if (useWhitespace)
+		
 			suggestions.addAll(whitespace(word));
 
 		comp = new Led(word);

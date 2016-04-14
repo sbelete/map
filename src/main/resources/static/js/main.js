@@ -238,12 +238,12 @@ canvas.addEventListener("mouseup", function(event){
 var inputS1 = $("#streetS1");
 
 // Suggestion textboxes
-var boxes1 =
-    [$("#sug11"),
-    $("#sug12"),
-    $("#sug13"),
-    $("#sug14"),
-    $("#sug15")];
+var correctionsS1 =
+    [$("#suggestS11"),
+    $("#suggestS12"),
+    $("#suggestS13"),
+    $("#suggestS14"),
+    $("#suggestS15")];
 
 // Input textbox
 var inputS2 = $("#streetS2");
@@ -282,76 +282,44 @@ var suggestionColor = "white";
 var noSuggestionColor = "rgb(200, 200, 200)";
 // Color of a suggestion box that has a suggestion and is moused-over
 var highlightedColor = "orange";
-
+*/
+    
 // When the input text box is updated, get suggestions
-inputS1.on("keyup", getSuggestions1);
+//inputS1.on("keyup", getSuggestions1);
 inputS1.keyup(function(e){
-    console.log(e);
-    $('#autocomplete1').val($(this).val() + 'asdf')
+
+    var postParameters = {street_name: inputS1[0].value};
+	$.post("/auto", postParameters, function(suggestionsJSON){
+		console.log(suggestionsJSON);
+		setSuggestions(JSON.parse(suggestionsJSON), correctionsS1);
+	});
+	
 });
 // Makes a post request to get suggestions for input
-function getSuggestions1() {
-    var postParameters = {input: inputS1[0].value, on: true};
-    $.post("/auto", postParameters, showSuggestions1);
-}
+function setSuggestions(listSuggest, suggestions) {
+	var i;
+	for(i = 0; i > 5 && i > listSuggest.size; i++){
+
+		suggestions[i] = listSuggest[i];
+	}
+	
+	for(i; i > 5; i++){
+		suggestions[i] ="";
+	}
+};
 
 // Displays a list of suggestions
 function showSuggestions1(suggestionsJSON) {
     // Get the suggestions list
-    var suggestionsObject = JSON.parse(suggestionsJSON);
-    var suggestions = suggestionsObject.list;
-
-    // First, disable and clear all boxes
-    clearSuggestions1();
-
-    // Then, fill in the suggestions
-    for (var i = 0; i < suggestions.length; i++) {
-        var box = boxes1[i][0];
-        box.style.backgroundColor = suggestionColor;
-        box.value = suggestions[i];
-        // Make sure the user can see the end of the suggestion
-        box.scrollLeft = box.scrollWidth;
-    }
+ 
 }
 
 // Clears all suggestions
 function clearSuggestions1() {
-    for (var i = 0; i < boxes1.length; i++) {
-        var box = boxes1[i][0];
-        box.style.backgroundColor = noSuggestionColor;
-        box.value = "";
-    }
+ 
 }
 
 // Events for each suggestion box
-boxes1.forEach(function(box) {
-    // At the beginning, the boxes have no suggestions
-    box[0].style.backgroundColor = noSuggestionColor;
-
-    // When a box with a suggestion is moused-over, highlight it
-    box.on("mouseover", function() {
-       if (box[0].style.backgroundColor === suggestionColor) {
-           box[0].style.backgroundColor = highlightedColor;
-       }
-    });
-
-    // When the mouse leaves a highlighted box, un-highlight it
-    box.on("mouseout", function() {
-        if (box[0].style.backgroundColor === highlightedColor) {
-            box[0].style.backgroundColor = suggestionColor;
-        }
-    });
-
-    // When a box with a suggestion is clicked, replace the input text with
-    // the suggestion and display new suggestions
-    box.on("click", function() {
-        if (box[0].style.backgroundColor === suggestionColor
-                || box[0].style.backgroundColor === highlightedColor) {
-            inputS1[0].value = box[0].value;
-            getSuggestions1();
-        }
-    });
-});
 
 // When the input text box is updated, get suggestions
 inputS2.on("keyup", getSuggestions2);
@@ -365,60 +333,14 @@ function getSuggestions2() {
 // Displays a list of suggestions
 function showSuggestions2(suggestionsJSON) {
     // Get the suggestions list
-    var suggestionsObject = JSON.parse(suggestionsJSON);
-    var suggestions = $.map(suggestionsObject, function(e) {return e;});
-
-    // First, disable and clear all boxes
-    clearSuggestions2();
-
-    // Then, fill in the suggestions
-    for (var i = 0; i < suggestions.length; i++) {
-        var box = boxes2[i][0];
-        box.style.backgroundColor = suggestionColor;
-        box.value = suggestions[i];
-        // Make sure the user can see the end of the suggestion
-        box.scrollLeft = box.scrollWidth;
-    }
+  
 }
 
 // Clears all suggestions
 function clearSuggestions2() {
-    for (var i = 0; i < boxes2.length; i++) {
-        var box = boxes2[i][0];
-        box.style.backgroundColor = noSuggestionColor;
-        box.value = "";
-    }
+    
 }
 
-// Events for each suggestion box
-boxes2.forEach(function(box) {
-    // At the beginning, the boxes have no suggestions
-    box[0].style.backgroundColor = noSuggestionColor;
-
-    // When a box with a suggestion is moused-over, highlight it
-    box.on("mouseover", function() {
-       if (box[0].style.backgroundColor === suggestionColor) {
-           box[0].style.backgroundColor = highlightedColor;
-       }
-    });
-
-    // When the mouse leaves a highlighted box, un-highlight it
-    box.on("mouseout", function() {
-        if (box[0].style.backgroundColor === highlightedColor) {
-            box[0].style.backgroundColor = suggestionColor;
-        }
-    });
-
-    // When a box with a suggestion is clicked, replace the input text with
-    // the suggestion and display new suggestions
-    box.on("click", function() {
-        if (box[0].style.backgroundColor === suggestionColor
-                || box[0].style.backgroundColor === highlightedColor) {
-            inputS2[0].value = box[0].value;
-            getSuggestions2();
-        }
-    });
-});
 
 // When the input text box is updated, get suggestions
 inputF1.on("keyup", getSuggestions3);
@@ -431,61 +353,13 @@ function getSuggestions3() {
 
 // Displays a list of suggestions
 function showSuggestions3(suggestionsJSON) {
-    // Get the suggestions list
-    var suggestionsObject = JSON.parse(suggestionsJSON);
-    var suggestions = $.map(suggestionsObject, function(e) {return e;});
-
-    // First, disable and clear all boxes
-    clearSuggestions3();
-
-    // Then, fill in the suggestions
-    for (var i = 0; i < suggestions.length; i++) {
-        var box = boxes3[i][0];
-        box.style.backgroundColor = suggestionColor;
-        box.value = suggestions[i];
-        // Make sure the user can see the end of the suggestion
-        box.scrollLeft = box.scrollWidth;
-    }
+  
 }
 
 // Clears all suggestions
 function clearSuggestions3() {
-    for (var i = 0; i < boxes3.length; i++) {
-        var box = boxes3[i][0];
-        box.style.backgroundColor = noSuggestionColor;
-        box.value = "";
-    }
+  
 }
-
-// Events for each suggestion box
-boxes3.forEach(function(box) {
-    // At the beginning, the boxes have no suggestions
-    box[0].style.backgroundColor = noSuggestionColor;
-
-    // When a box with a suggestion is moused-over, highlight it
-    box.on("mouseover", function() {
-       if (box[0].style.backgroundColor === suggestionColor) {
-           box[0].style.backgroundColor = highlightedColor;
-       }
-    });
-
-    // When the mouse leaves a highlighted box, un-highlight it
-    box.on("mouseout", function() {
-        if (box[0].style.backgroundColor === highlightedColor) {
-            box[0].style.backgroundColor = suggestionColor;
-        }
-    });
-
-    // When a box with a suggestion is clicked, replace the input text with
-    // the suggestion and display new suggestions
-    box.on("click", function() {
-        if (box[0].style.backgroundColor === suggestionColor
-                || box[0].style.backgroundColor === highlightedColor) {
-            inputF1[0].value = box[0].value;
-            getSuggestions3();
-        }
-    });
-});
 
 // When the input text box is updated, get suggestions
 inputF2.on("keyup", getSuggestions4);
@@ -498,21 +372,7 @@ function getSuggestions4() {
 
 // Displays a list of suggestions
 function showSuggestions4(suggestionsJSON) {
-    // Get the suggestions list
-    var suggestionsObject = JSON.parse(suggestionsJSON);
-    var suggestions = $.map(suggestionsObject, function(e) {return e;});
-
-    // First, disable and clear all boxes
-    clearSuggestions4();
-
-    // Then, fill in the suggestions
-    for (var i = 0; i < suggestions.length; i++) {
-        var box = boxes4[i][0];
-        box.style.backgroundColor = suggestionColor;
-        box.value = suggestions[i];
-        // Make sure the user can see the end of the suggestion
-        box.scrollLeft = box.scrollWidth;
-    }
+   
 }
 
 // Clears all suggestions
@@ -526,33 +386,4 @@ function clearSuggestions4() {
 
 
 
-// Events for each suggestion box
-boxes4.forEach(function(box) {
-    // At the beginning, the boxes have no suggestions
-    box[0].style.backgroundColor = noSuggestionColor;
 
-    // When a box with a suggestion is moused-over, highlight it
-    box.on("mouseover", function() {
-       if (box[0].style.backgroundColor === suggestionColor) {
-           box[0].style.backgroundColor = highlightedColor;
-       }
-    });
-
-    // When the mouse leaves a highlighted box, un-highlight it
-    box.on("mouseout", function() {
-        if (box[0].style.backgroundColor === highlightedColor) {
-            box[0].style.backgroundColor = suggestionColor;
-        }
-    });
-
-    // When a box with a suggestion is clicked, replace the input text with
-    // the suggestion and display new suggestions
-    box.on("click", function() {
-        if (box[0].style.backgroundColor === suggestionColor
-                || box[0].style.backgroundColor === highlightedColor) {
-            inputF2[0].value = box[0].value;
-            getSuggestions4();
-        }
-    });
-});
-*/
