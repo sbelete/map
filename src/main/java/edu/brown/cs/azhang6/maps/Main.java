@@ -62,7 +62,8 @@ public class Main {
     /**
      * Usage message.
      */
-    private static final String USAGE = "Usage: ./run [--gui] database";
+    private static final String USAGE =
+        "Usage: ./run [--gui] [--traffic-port=port] database";
 
     /**
      * Command line arguments.
@@ -190,6 +191,8 @@ public class Main {
             = parser.nonOptions().ofType(String.class);
         parser.accepts("help", "display help message");
         parser.accepts("gui", "run spark server");
+        parser.accepts("traffic-port", "traffic server port")
+            .withRequiredArg().ofType(int.class);
 
         try {
             // Parse options
@@ -225,8 +228,14 @@ public class Main {
             }
 
             // Setup traffic server
-            traffic = new TrafficClient(String.format(
-                "http://localhost:%d?last=", TRAFFIC_PORT));
+            if (options.has("traffic-port")) {
+                int trafficPort = (int) options.valueOf("traffic-port");
+                traffic = new TrafficClient(String.format(
+                    "http://localhost:%d?last=", trafficPort));
+            } else {
+                traffic = new TrafficClient(String.format(
+                    "http://localhost:%d?last=", TRAFFIC_PORT));
+            }
             traffic.start(TRAFFIC_QUERY_RATE);
 
             // Whether to run GUI or REPL
