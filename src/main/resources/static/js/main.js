@@ -72,12 +72,12 @@ function nearestNode(x, y){
 };
 
 function textEnter1(){
-	var postParameters = {first_street : input1, second_street : input2};
+	var postParameters = {first_street : input1[0].value, second_street : input2[0].value};
 	$.post("/findIntersection", postParameters, setLocationStart);
 };
 
 function textEnter2(){
-	var postParameters = {first_street :input3, second_street : input4};
+	var postParameters = {first_street :input3[0].value, second_street : input4[0].value};
 	$.post("/findIntersection", postParameters, setLocationFinish);
 };
 
@@ -185,8 +185,7 @@ function submitStart() {
 
 function clearDestination() {
 	   // Get the first form with the name
-	   var frm = document.getElementsById('destination')[0];
-	   frm.reset();  // Reset
+	document.getElementById("myForm").reset();
 	   $.post("/clear", {}, paint);
 	   finish_id = null;
 	   finish_lat = null;

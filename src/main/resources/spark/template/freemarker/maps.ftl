@@ -14,8 +14,8 @@
   <br><br>
   Start Street 2:
   <input type="text" name="start_street_1"><br><br>
-  <input type="button" value="Submit" id="btnsubmit" onclick="submitStart()">
-  <input type="button" value="Clear" id="btnsubmit" onclick="clearForm()">
+  <input type="button" value="Submit" id="btnsubmit" onclick="textEnter1()">
+  <input type="button" value="Clear" id="btnsubmit" onclick="clearStart()">
 </form>
 
 <br><br>
@@ -25,8 +25,8 @@
   <br><br>
   Start Street 2:
   <input type="text" name="finish_street_1"><br><br>
-  <input type="button" value="Submit" id="btnsubmit" onclick="submitFinish()">
-  <input type="button" value="Clear" id="btnsubmit" onclick="clearForm()">
+  <input type="button" value="Submit" id="btnsubmit" onclick="textEnter2()">
+  <input type="button" value="Clear" id="btnsubmit" onclick="clearDestination()">
 </form>
 </div>
 
