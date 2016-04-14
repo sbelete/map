@@ -4,6 +4,7 @@ import edu.brown.cs.azhang6.db.Database;
 import edu.brown.cs.azhang6.dimension.LatLng;
 import edu.brown.cs.azhang6.maps.Node;
 import edu.brown.cs.azhang6.maps.NodeProxy;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -28,7 +29,8 @@ public class LatLngKDTreeTest {
             // File with ~1000 nodes
             Database db = new Database("files/medMaps.sqlite3");
             NodeProxy.setDB(db);
-            try (PreparedStatement prep = db.getConn().prepareStatement(
+            Connection conn = db.getConnection();
+            try (PreparedStatement prep = conn.prepareStatement(
                 "SELECT id FROM node;")) {
                 List<Node> nodes = db.query(prep).stream().map(s -> Node.of(s))
                     .collect(Collectors.toList());
@@ -38,6 +40,8 @@ public class LatLngKDTreeTest {
                     = new KDTreeOracle<>(tree, nodes, LatLng::new);
                 assertTrue(oracle.testNearestNeighbors());
                 assertTrue(oracle.testRadiusSearch());
+            } finally {
+                db.returnConnection(conn);
             }
         } catch (ClassNotFoundException | SQLException e) {
             throw new RuntimeException(e);

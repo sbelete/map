@@ -27,6 +27,7 @@ import freemarker.template.Configuration;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.IllegalCharsetNameException;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -34,6 +35,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
@@ -129,22 +132,22 @@ public class Main {
     /**
      * Old edges.
      */
-    private final List<Object[]> oldEdges = new ArrayList<>();
+    private final List<Object[]> oldEdges = new CopyOnWriteArrayList<>();
     
     /**
      * New edges.
      */
-    private final List<Object[]> newEdges = new ArrayList<>();
+    private final List<Object[]> newEdges = new CopyOnWriteArrayList<>();
     
     /**
      * Coordinates of new edges.
      */
-    private final List<double[]> newCoords = new ArrayList<>();
+    private final List<double[]> newCoords = new CopyOnWriteArrayList<>();
 
     /**
      * Edges in shortest path.
      */
-    private final Map<String, Boolean> pathEdges = new HashMap<>();
+    private final Map<String, Boolean> pathEdges = new ConcurrentHashMap<>();
 
     public static boolean done = false;
     
@@ -200,7 +203,7 @@ public class Main {
                             db.close();
                         }
                     } catch (Exception e) {
-                        System.out.println("ERROR: error closing database");
+                        System.out.println("ERROR: error closing database: " + e);
                     }
                 }));
                 // Make sure node and way proxies use the database
@@ -232,7 +235,8 @@ public class Main {
      * Sets up kd-tree.
      */
     private void setupKDTree() {
-        try (PreparedStatement prep = db.getConn().prepareStatement(
+        Connection conn = db.getConnection();
+        try (PreparedStatement prep = conn.prepareStatement(
             "SELECT id FROM node;")) {
             List<Node> nodesToAdd = new ArrayList<>();
             db.query(prep, rs -> {
@@ -251,6 +255,8 @@ public class Main {
                 new KDNodeParallel<>(nodesToAdd, 0, KD_TREE_PARALLEL_LEVEL));
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            db.returnConnection(conn);
         }
     }
 
@@ -258,12 +264,15 @@ public class Main {
      * Sets up trie.
      */
     private void setupAutocorrect() {
-        try (PreparedStatement prep = db.getConn().prepareStatement(
+        Connection conn = db.getConnection();
+        try (PreparedStatement prep = conn.prepareStatement(
             "SELECT name FROM way;")) {
             List<String> streets = db.query(prep);
             corrector = new StreetComplete(streets, streets);
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            db.returnConnection(conn);
         }
     }
 
@@ -446,6 +455,10 @@ public class Main {
          */
         @Override
         public ModelAndView handle(Request req, Response res) {
+            oldEdges.clear();
+            newEdges.clear();
+            newCoords.clear();
+            pathEdges.clear();
             return new ModelAndView(ImmutableMap.of(), "maps.ftl");
         }
     }

@@ -1,6 +1,7 @@
 package edu.brown.cs.azhang6.maps;
 
 import edu.brown.cs.azhang6.db.Database;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
@@ -53,12 +54,15 @@ public class WayProxy extends Way {
      * @return list of IDs corresponding to name
      */
     public static List<String> idsForName(String name) {
-        try (PreparedStatement prep = db.getConn().prepareStatement(
+        Connection conn = db.getConnection();
+        try (PreparedStatement prep = conn.prepareStatement(
             "SELECT id FROM way WHERE name=?;")) {
             prep.setString(1, name);
             return db.query(prep);
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            db.returnConnection(conn);
         }
     }
 
@@ -69,7 +73,8 @@ public class WayProxy extends Way {
      */
     private Way fill() {
         if (!filled) {
-            try (PreparedStatement prep = db.getConn().prepareStatement(
+            Connection conn = db.getConnection();
+            try (PreparedStatement prep = conn.prepareStatement(
                 "SELECT * FROM way WHERE id=?;")) {
                 prep.setString(1, id);
                 db.query(prep, r -> {
@@ -86,6 +91,8 @@ public class WayProxy extends Way {
                 filled = true;
             } catch (SQLException e) {
                 throw new RuntimeException(e);
+            } finally {
+                db.returnConnection(conn);
             }
         }
         return internal;

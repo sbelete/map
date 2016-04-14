@@ -3,6 +3,7 @@ package edu.brown.cs.azhang6.maps;
 import edu.brown.cs.azhang6.db.Database;
 import edu.brown.cs.azhang6.graph.DWEdge;
 import edu.brown.cs.azhang6.graph.MutableDWEdge;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -55,7 +56,8 @@ public class NodeProxy extends Node {
      * @return latitude and longitude
      */
     private static double[] latLngForId(String id) {
-        try (PreparedStatement prep = db.getConn().prepareStatement(
+        Connection conn = db.getConnection();
+        try (PreparedStatement prep = conn.prepareStatement(
             "SELECT * FROM node WHERE id=?;")) {
             if (Main.done) {
                 System.out.println("prep closed 0? " + prep.isClosed());
@@ -78,6 +80,8 @@ public class NodeProxy extends Node {
             });
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            db.returnConnection(conn);
         }
     }
     
@@ -94,7 +98,8 @@ public class NodeProxy extends Node {
         Set<String> way1Nodes = new HashSet<>();
         Set<String> way2Nodes = new HashSet<>();
         // Get all the nodes on the two ways
-        try (PreparedStatement prep = db.getConn().prepareStatement(
+        Connection conn = db.getConnection();
+        try (PreparedStatement prep = conn.prepareStatement(
             "SELECT start,end FROM way WHERE id=?;")) {
             for (String way1Id : way1Ids) {
                 prep.setString(1, way1Id);
@@ -128,6 +133,8 @@ public class NodeProxy extends Node {
             return Node.of(way1Nodes.iterator().next());
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            db.returnConnection(conn);
         }
     }
 
@@ -146,7 +153,8 @@ public class NodeProxy extends Node {
     private Node fillEdges() {
         if (internal.edges == null) {
             // Get all ways starting from this node
-            try (PreparedStatement prep = db.getConn().prepareStatement(
+            Connection conn = db.getConnection();
+            try (PreparedStatement prep = conn.prepareStatement(
                 "SELECT id FROM way WHERE start=?;")) {
                 prep.setString(1, getId());
                 List<String> ways = db.query(prep);
@@ -159,6 +167,8 @@ public class NodeProxy extends Node {
                 });
             } catch (SQLException e) {
                 throw new RuntimeException(e);
+            } finally {
+                db.returnConnection(conn);
             }
         } else {
             // Make sure ways have updated traffic

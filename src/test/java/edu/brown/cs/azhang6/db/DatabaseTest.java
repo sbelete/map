@@ -1,5 +1,6 @@
 package edu.brown.cs.azhang6.db;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -56,7 +57,8 @@ public class DatabaseTest {
      */
     @Test
     public void testQuery_PreparedStatement() throws SQLException {
-        try (PreparedStatement prep1 = db.getConn().prepareStatement(
+        Connection conn = db.getConnection();
+        try (PreparedStatement prep1 = conn.prepareStatement(
             "SELECT * FROM node;")) {
             List<String> expected1 = new ArrayList<>();
             expected1.add("/n/0");
@@ -66,6 +68,8 @@ public class DatabaseTest {
             expected1.add("/n/4");
             expected1.add("/n/5");
             assertEquals(db.query(prep1), expected1);
+        } finally {
+            db.returnConnection(conn);
         }
     }
 
@@ -76,7 +80,8 @@ public class DatabaseTest {
      */
     @Test
     public void testQuery_PreparedStatement_Function() throws SQLException {
-        try (PreparedStatement prep1 = db.getConn().prepareStatement(
+        Connection conn = db.getConnection();
+        try (PreparedStatement prep1 = conn.prepareStatement(
             "SELECT * FROM way;")) {
             Set<String> expected1 = new TreeSet<>();
             expected1.add("Chihiro Ave");
@@ -95,6 +100,8 @@ public class DatabaseTest {
                     throw new RuntimeException(e);
                 }
             }), expected1);
+        } finally {
+            db.returnConnection(conn);
         }
     }
 
@@ -105,7 +112,8 @@ public class DatabaseTest {
      */
     @Test
     public void testQuery_PreparedStatement_Consumer() throws Exception {
-        try (PreparedStatement prep1 = db.getConn().prepareStatement(
+        Connection conn = db.getConnection();
+        try (PreparedStatement prep1 = conn.prepareStatement(
             "SELECT * FROM way;")) {
             Set<String> expected1 = new TreeSet<>();
             expected1.add("Chihiro Ave");
@@ -124,6 +132,8 @@ public class DatabaseTest {
                     throw new RuntimeException(e);
                 }
             });
+        } finally {
+            db.returnConnection(conn);
         }
     }
 

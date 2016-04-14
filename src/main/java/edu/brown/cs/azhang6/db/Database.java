@@ -1,11 +1,13 @@
 package edu.brown.cs.azhang6.db;
 
+import edu.brown.cs.azhang6.maps.Main;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -21,11 +23,21 @@ public class Database implements AutoCloseable {
      * Database file.
      */
     private final String db;
-
+    
     /**
-     * Connection.
+     * Available connections.
      */
-    private final Connection conn;
+    private final List<Connection> availableConnections = new ArrayList<>();
+    
+    /**
+     * Used connections.
+     */
+    private final List<Connection> usedConnections = new ArrayList<>();
+    
+    /**
+     * Maximum number of connections.
+     */
+    private static final int MAX_CONNECTIONS = 3;
 
     /**
      * New database.
@@ -37,7 +49,7 @@ public class Database implements AutoCloseable {
     public Database(String db) throws ClassNotFoundException, SQLException {
         Class.forName("org.sqlite.JDBC");
         this.db = db;
-        this.conn = DriverManager.getConnection("jdbc:sqlite:" + db);
+        availableConnections.add(DriverManager.getConnection("jdbc:sqlite:" + db));
     }
 
     /**
@@ -101,6 +113,7 @@ public class Database implements AutoCloseable {
      */
     public boolean has(String table, String column1, String value1,
         String column2, String value2) {
+        Connection conn = getConnection();
         try (PreparedStatement prep = conn.prepareStatement(String.format(
             "SELECT * FROM %s WHERE %s=? AND %s=?;", table, column1, column2))) {
             prep.setString(1, value1);
@@ -108,6 +121,8 @@ public class Database implements AutoCloseable {
             return !query(prep).isEmpty();
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            returnConnection(conn);
         }
     }
 
@@ -119,14 +134,71 @@ public class Database implements AutoCloseable {
     }
 
     /**
+     * Gets an available connection.
+     * 
      * @return connection
      */
-    public Connection getConn() {
-        return conn;
+    public synchronized Connection getConnection() {
+        if (!availableConnections.isEmpty()) {
+            // If there are available connections
+            Connection returned = availableConnections.get(0);
+            if (Main.done) {
+                System.out.println("returned0: " + returned);
+            }
+            availableConnections.remove(returned);
+            usedConnections.add(returned);
+            return returned;
+        } else if (usedConnections.size() < MAX_CONNECTIONS) {
+            // If we can make another available connection
+            try {
+                Connection returned =
+                    DriverManager.getConnection("jdbc:sqlite:" + db);
+                if (Main.done) {
+                    System.out.println("returned1: " + returned);
+                }
+                usedConnections.add(returned);
+                return returned;
+            } catch (SQLException e) {
+                throw new RuntimeException("couldn't open JDBC connection", e);
+            }
+        } else {
+            // If we have to wait for a connection to become available
+            try {
+                while (availableConnections.isEmpty()) {
+                    wait();
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(
+                    "interrupted while waiting for connection", e);
+            }
+            return getConnection();
+        }
+    }
+    
+    /**
+     * Returns the connection used by this thread.
+     */
+    public synchronized void returnConnection(Connection toReturn) {
+        if (Main.done) {
+            System.out.println("toReturn: " + toReturn);
+        }
+        usedConnections.remove(toReturn);
+        availableConnections.add(toReturn);
+        notifyAll();
     }
 
+    /**
+     * Closes all connections.
+     * 
+     * @throws Exception if exception while closing connections
+     */
     @Override
     public void close() throws Exception {
-        conn.close();
+        for (Connection conn : availableConnections) {
+            conn.close();
+        }
+        for (Connection conn : usedConnections) {
+            conn.close();
+        }
     }
 }

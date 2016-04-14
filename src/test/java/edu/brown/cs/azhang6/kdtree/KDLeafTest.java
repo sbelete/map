@@ -7,6 +7,7 @@ import edu.brown.cs.azhang6.maps.Node;
 import edu.brown.cs.azhang6.maps.NodeProxy;
 import edu.brown.cs.azhang6.stars.Star;
 import edu.brown.cs.azhang6.stars.StarsReader;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -265,7 +266,8 @@ public class KDLeafTest {
       try {
           Database db = new Database("files/smallMaps.sqlite3");
           NodeProxy.setDB(db);
-          try (PreparedStatement prep = db.getConn().prepareStatement(
+          Connection conn = db.getConnection();
+          try (PreparedStatement prep = conn.prepareStatement(
               "SELECT id FROM node;")) {
               List<Node> nodes = db.query(prep).stream().map(s -> Node.of(s))
                   .collect(Collectors.toList());
@@ -274,6 +276,8 @@ public class KDLeafTest {
                   new KDTreeOracle<>(tree, nodes, LatLng::new);
               assertTrue(oracle.testNearestNeighbors());
               assertTrue(oracle.testRadiusSearch());
+          } finally {
+              db.returnConnection(conn);
           }
       } catch (ClassNotFoundException | SQLException e) {
           throw new RuntimeException(e);
