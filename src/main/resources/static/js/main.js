@@ -158,8 +158,8 @@ function paint(nodesJSON){
 		var x = (start_lng - latitude   + size/2) * (canvasSize/size);
 		var y = (start_lat - latitude   + size/2) * (canvasSize/size);
 		ctx.arc(x,y, 5,0,2*Math.PI);
-		context.fillStyle = 'blue';
-		context.fill();
+		ctx.fillStyle = 'blue';
+		ctx.fill();
 		ctx.stroke();
 	}
 	if(finish_id != null){
