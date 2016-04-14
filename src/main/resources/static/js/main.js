@@ -63,7 +63,7 @@ function nearestNode(x, y){
 	var lon = x*(size/canvasSize) - size/2 + longitude;
 	var lat = y*(size/canvasSize) - size/2 + latitude;
 	
-	var postParameters = {lat : latitude, lon: longitude};
+	var postParameters = {lat : lat, lon: lon};
 	if(start_id == null){
 		$.post("/nearestNeighbor", postParameters, setLocationStart);
 	} else {
