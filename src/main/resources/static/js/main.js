@@ -93,6 +93,7 @@ function textEnter2(){
 	$.post("/findIntersection", postParameters, setLocationFinish);
 };
 
+
 function clearText2() {
 	   // Get the first form with the name
 		input3[0].value = "";
