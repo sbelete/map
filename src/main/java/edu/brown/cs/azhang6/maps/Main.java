@@ -594,7 +594,7 @@ public class Main {
             List<String> suggestions = corrector.suggest(streetName);
 
             List<Object> variables
-                = ImmutableList.of("list", suggestions.subList(0, 4));
+                = ImmutableList.of(suggestions.subList(0, 4));
 
             return GSON.toJson(variables);
         }
@@ -737,9 +737,9 @@ public class Main {
             Map<String, Object> variables;
             if (intersection == null) {
                 variables = ImmutableMap.of(
-                    "id", null,
-                    "lat", null,
-                    "lng", null);
+                    "id", "",
+                    "lat", "",
+                    "lng", "");
             } else {
                 variables = ImmutableMap.of(
                     "id", intersection.getId(),
