@@ -73,7 +73,7 @@ function nearestNode(x, y){
 	var lat = y*(size/canvasSize) - size/2 + latitude;
 	
 	var postParameters = {lat : latitude, lon: longitude};
-	if(start != null){
+	if(start_id != null){
 		$.post("/nearestNeighbor", postParameters, setLocationStart);
 	} else {
 		$.post("/nearestNeighbor", postParameters, setLocationFinish);
@@ -91,7 +91,7 @@ function textEnter2(){
 };
 
 function shortestPath(){
-	if(start == null || finish == null){
+	if(start_id == null || finish_id == null){
 		var postParameters = {start_id : start_id, finish_id : finish_id};
 		$.post("/shortestPath", postParameters, paint);
 	}

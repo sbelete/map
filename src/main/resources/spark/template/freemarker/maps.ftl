@@ -8,7 +8,7 @@
 
 <div id= "forms">
 
-<form class="start">
+<form id = "start" class="start">
   Start Street 1: 
   <input type="text" name="start_street_1">
   <br><br>
