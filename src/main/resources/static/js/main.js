@@ -137,7 +137,7 @@ function paint(nodesJSON){
 		if (pathEdges[oldEdges[i][0]] == null) {
 			paintCoordsTraffic(coords, traffic, 1);
 		} else {
-			paintCoordsTraffic(coords, traffic, 3);
+			paintCoordsTraffic(coords, traffic, 5);
 		}
 	}
 	for (j = 0; j < newEdges.length; j++) {
@@ -147,7 +147,7 @@ function paint(nodesJSON){
 		if (pathEdges[newEdges[j][0]] == null) {
 			paintCoordsTraffic(coords, traffic, 1);
 		} else {
-			paintCoordsTraffic(coords, traffic, 3);
+			paintCoordsTraffic(coords, traffic, 5);
 		}
 	}
 	
@@ -155,7 +155,7 @@ function paint(nodesJSON){
 		var c = canvas
 		var ctx = c.getContext("2d");
 		ctx.beginPath();
-		var x = (start_lng - latitude   + size/2) * (canvasSize/size);
+		var x = (start_lng - longitude   + size/2) * (canvasSize/size);
 		var y = (start_lat - latitude   + size/2) * (canvasSize/size);
 		ctx.arc(x,y, 5,0,2*Math.PI);
 		ctx.fillStyle = 'blue';
@@ -166,7 +166,7 @@ function paint(nodesJSON){
 		var c2 = canvas
 		var ctx2 = c2.getContext("2d");
 		ctx2.beginPath();
-		var x2 = (finish_lng - latitude   + size/2) * (canvasSize/size);
+		var x2 = (finish_lng - longitude   + size/2) * (canvasSize/size);
 		var y2 = (finish_lat - latitude   + size/2) * (canvasSize/size);
 		ctx2.arc(x2,x2, 5,0,2*Math.PI);
 		ctx2.fillStyle = 'blue';
