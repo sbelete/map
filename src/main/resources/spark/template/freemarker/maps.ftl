@@ -3,6 +3,7 @@
 <canvas id="map" width="600" height="600"></canvas>
 
 <div id= "word_maps">
+	<p><b>MAPS</b></p>
 </div>
 
 <div id= "forms">

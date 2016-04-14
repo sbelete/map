@@ -62,8 +62,7 @@ function mouseDrag(deltaX, deltaY){
 	latitude = latitude + (deltaY/canvasSize) * size;
 	var degreeLong = size * 110.574 / (111.320 * Math.cos(latitude));
 	longitude = longitude + (deltaX/canvasSize) * degreeLong;
-	
-	updateNodes();
+	repaint();
 };
 
 function nearestNode(x, y){
@@ -102,8 +101,6 @@ function repaint(){
 
 function paint(nodesJSON){
 	var nodesObject = JSON.parse(nodesJSON);
-	console.log(nodesObject);
-
 	// Array of 2-element arrays: first is ID, second is traffic
 	var oldEdges = nodesObject.oldEdges;
 	// Array of 2-element arrays: first is ID, second is traffic
@@ -113,7 +110,6 @@ function paint(nodesJSON){
 	// Edges in the shortest path
 	var pathEdges = nodesObject.pathEdges;
 	canvas.getContext("2d").clearRect(0, 0, canvasSize, canvasSize);
-
 	for (i = 0; i < oldEdges.length; i++) {
 		var coords = cache[oldEdges[i][0]];
 		var traffic = oldEdges[i][1];
@@ -220,7 +216,7 @@ function paint_helper_path(y1, x1, y2, x2, weight){
 
 canvas.addEventListener('mousewheel', function(event){
 	size = size + 0.00000833333*event.wheelDelta;
-	updateNodes();
+	repaint();
 	return false;
 }, false);
 

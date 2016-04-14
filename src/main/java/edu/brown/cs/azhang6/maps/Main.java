@@ -535,7 +535,6 @@ public class Main {
          */
         @Override
         public Object handle(final Request req, final Response res) {
-            long millisBefore = System.currentTimeMillis();
             QueryParamsMap qm = req.queryMap();
             double latitude = Double.parseDouble(qm.value("lat"));
             double longitude = Double.parseDouble(qm.value("lon"));
@@ -572,8 +571,6 @@ public class Main {
                 "newCoords", newCoords,
                 "pathEdges", pathEdges
             );
-            long millisAfter = System.currentTimeMillis();
-            System.out.println(millisAfter - millisBefore);
             return GSON.toJson(variables);
         }
     }
