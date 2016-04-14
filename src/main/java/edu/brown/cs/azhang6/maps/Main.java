@@ -436,10 +436,10 @@ public class Main {
         Thread autoThread = new Thread(() -> {
             setupAutocorrect();
         });
-        //autoThread.start();
+        autoThread.start();
         try {
             kdThread.join();
-            //autoThread.join();
+            autoThread.join();
         } catch (InterruptedException e) {
             throw new RuntimeException(
                 "interrupted while setting up kdtree and autocorrect", e);
@@ -567,6 +567,7 @@ public class Main {
             newEdges.clear();
             newCoords.clear();
             } else {
+                System.out.println("no shortest path");
                 oldEdges.addAll(newEdges);
                 newEdges.clear();
                 newCoords.clear();

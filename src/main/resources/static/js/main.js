@@ -9,7 +9,7 @@ var canvasSize = canvas.height;
 var submit = $("#submit")[0];
 
 var mouseDownX;
-var mouseDonwY;
+var mouseDownY;
 
 var start_lat;
 var start_lng;
@@ -35,6 +35,7 @@ function setLocationStart(nodesJSON){
 		start_lng = null;
 		start_lat  = null;
 	}
+	repaint();
 };
 
 function setLocationFinish(nodesJSON){
@@ -49,10 +50,11 @@ function setLocationFinish(nodesJSON){
 		finish_lng = null;
 		finish_id  = null;
 	}
+	repaint();
 };
 
 function mouseDrag(deltaX, deltaY){
-	latitude = latitude + (deltaY/canvasSize) * size;
+	latitude = latitude + (-deltaY/canvasSize) * size;
 	var degreeLong = size * 110.574 / (111.320 * Math.cos(latitude));
 	longitude = longitude + (deltaX/canvasSize) * degreeLong;
 
@@ -61,7 +63,7 @@ function mouseDrag(deltaX, deltaY){
 
 function nearestNode(x, y){
 	var lon = x*(size/canvasSize) - size/2 + longitude;
-	var lat = y*(size/canvasSize) - size/2 + latitude;
+	var lat = (canvasSize - y)*(size/canvasSize) - size/2 + latitude;
 	
 	var postParameters = {lat : lat, lon: lon};
 	if(start_id == null){
@@ -157,7 +159,7 @@ function paint(nodesJSON){
 		ctx.beginPath();
 		var x = (start_lng - longitude   + size/2) * (canvasSize/size);
 		var y = (start_lat - latitude   + size/2) * (canvasSize/size);
-		ctx.arc(x,y, 5,0,2*Math.PI);
+		ctx.arc(x,canvasSize - y, 5,0,2*Math.PI);
 		ctx.fillStyle = 'blue';
 		ctx.fill();
 		ctx.stroke();
@@ -168,7 +170,7 @@ function paint(nodesJSON){
 		ctx2.beginPath();
 		var x2 = (finish_lng - longitude   + size/2) * (canvasSize/size);
 		var y2 = (finish_lat - latitude   + size/2) * (canvasSize/size);
-		ctx2.arc(x2,x2, 5,0,2*Math.PI);
+		ctx2.arc(x2,canvasSize - y2, 5,0,2*Math.PI);
 		ctx2.fillStyle = 'blue';
 		ctx2.fill();
 		ctx2.stroke();
@@ -190,8 +192,8 @@ function paint_helper(y1, x1, y2, x2, weight, lineWidth) {
 	var ctx = c.getContext("2d");
 	ctx.beginPath();
 	ctx.lineWidth=lineWidth;
-	ctx.moveTo(x1, y1);
-	ctx.lineTo(x2, y2);
+	ctx.moveTo(x1, canvasSize - y1);
+	ctx.lineTo(x2, canvasSize - y2);
 	if(weight > 5){
 		ctx.strokeStyle="#FF0000";
 	} else if(weight > 2){
@@ -223,7 +225,8 @@ canvas.addEventListener("mouseup", function(event){
 	var deltaX = event.clientX - mouseDownX;
 	var deltaY = mouseDownY - event.clientY;
 	if(deltaX == 0 && deltaY == 0){
-		nearestNode(mouseDownX, mouseDownY);
+		var canvasBox = canvas.getBoundingClientRect();
+		nearestNode(mouseDownX - canvasBox.left, mouseDownY - canvasBox.top);
 	} else{
 		mouseDrag(deltaX, deltaY);
 	}
