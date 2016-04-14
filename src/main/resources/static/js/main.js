@@ -76,6 +76,19 @@ function textEnter1(){
 	$.post("/findIntersection", postParameters, setLocationStart);
 };
 
+function clearStart() {
+	   // Get the first form with the name
+		input1[0].value = "";
+	   var frm = document.getElementsById('start')[0];
+	   frm.reset();  // Reset
+	   $.post("/clear", {}, paint);
+	   start_id = null;
+	   start_lat = null;
+	   start_lng = null;
+	   paintEnter(false);
+	   return false; // Prevent page refresh
+};
+
 function textEnter2(){
 	var postParameters = {first_street :input3[0].value, second_street : input4[0].value};
 	$.post("/findIntersection", postParameters, setLocationFinish);
@@ -163,17 +176,6 @@ canvas.addEventListener('mousewheel', function(event){
 	return false;
 }, false);
 
-function clearStart() {
-	   // Get the first form with the name
-	   var frm = document.getElementsById('start')[0];
-	   frm.reset();  // Reset
-	   $.post("/clear", {}, paint);
-	   start_id = null;
-	   start_lat = null;
-	   start_lng = null;
-	   paintEnter(false);
-	   return false; // Prevent page refresh
-};
 
 function submitStart() {
 	   // Get the first form with the name
@@ -222,7 +224,7 @@ canvas.addEventListener("mouseup", function(event){
 
 // ========================= AUTO CORRECCT ================================
 //Input textbox
-var input1 = $("#input1");
+var input1 = $("#street1"); //document.getElementsById("btnsubmit1"); //$("#input1");
 // Suggestion textboxes
 var boxes1 =
     [$("#sug11"),
@@ -232,7 +234,7 @@ var boxes1 =
     $("#sug15")];
 
 // Input textbox
-var input2 = $("#input2");
+var input2 = $("#street2");
 // Suggestion textboxes
 var boxes2 =
     [$("#sug21"),
@@ -242,7 +244,7 @@ var boxes2 =
     $("#sug25")];
 
     // Input textbox
-    var input3 = $("#input1");
+    var input3 = $("#street3");
     // Suggestion textboxes
     var boxes3 =
         [$("#sug31"),
@@ -252,7 +254,7 @@ var boxes2 =
         $("#sug35")];
 
     // Input textbox
-    var input4 = $("#input4");
+    var input4 = $("#street4");
     // Suggestion textboxes
     var boxes4 =
         [$("#sug41"),

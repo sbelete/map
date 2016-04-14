@@ -8,26 +8,15 @@
 
 <div id= "forms">
 
-<form id = "start" class="start">
-  Start Street 1: 
-  <input type="text" name="start_street_1">
-  <br><br>
-  Start Street 2:
-  <input type="text" name="start_street_1"><br><br>
-  <input type="button" value="Submit" id="btnsubmit" onclick="textEnter1()">
-  <input type="button" value="Clear" id="btnsubmit" onclick="clearStart()">
-</form>
+Start Street 1: <input type="text" id ="street1" name="street1" value=""><br><br>
+Start Street 2: <input type="text" id = "street2" name="street2" value=""><br><br>
+<input type="button" value="Submit" id="submit1" onclick="textEnter1()">
 
 <br><br>
-<form id = "destination" class="destination">
-   Start Street 1: 
-   <input type="text" name="finish_street_1">
-  <br><br>
-  Start Street 2:
-  <input type="text" name="finish_street_1"><br><br>
-  <input type="button" value="Submit" id="btnsubmit" onclick="textEnter2()">
-  <input type="button" value="Clear" id="btnsubmit" onclick="clearDestination()">
-</form>
+Destination Street 1: <input type="text" id ="street3" name="street3" value=""><br><br>
+Destination Street 2: <input type="text" id = "street4" name="street4" value=""><br><br>
+<input type="button" value="Submit" id="submit1" onclick="textEnter2()">
+
 </div>
 
 <div id= "enter">
