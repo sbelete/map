@@ -1,0 +1,89 @@
+Simon Belete (sbelete) and Aaron Zhang (azhang6)
+
+---
+Which partner's projects were used
+---
+
+Stars: Aaron
+Autocorrect: Simon
+Bacon: Aaron
+
+---
+Known bugs
+---
+
+The implementation of Dijkstra's algorithm used in the program allows you to stop the search if you've searched too many vertices or if the closest unvisited vertices are too far away.  When calling Dijkstra's algorithm, we made the search fail if more than 5000 vertices are searched or the closest unvisited vertex is more than approximately 5 times the straight-line distance from the start to the end node.  This decision was made to improve responsiveness of the front end, deliberately sacrificing some possible correctness.  We also have an implementation of Dijkstra's algorithm that does not fail like this, but after testing the frontend with both versions, we decided to use the version that fails more quickly.
+
+Not really a bug, but an area of improvement: when the user clicks on the map and we find the nearest neighbor, we just find the nearest neighbor out of all nodes in the map.  It would have been better to exclude nodes that are at the intersection of two residential ways, because often these nodes won't have any paths to other nodes.
+
+---
+Design details
+---
+
+Some notes for each package:
+
+- autocorrect: files from Autocorrect.  A version of Autocorrect better suited for this project is in the maps package.
+
+- csv: CSVReader copied from Stars.  Included just so the tests from Stars don't break.
+
+- db: Database class allows other classes to query a database by giving it a prepared statement.  Classes can get a connection from the database with conn = Database.getConnection(), and then tell the database that they're done using the connection with database.returnConnection(conn).  The getConnection() and returnConnection() methods allow the database to maintain multiple connections and be thread-safe.  More info in the "Runtime/space optimizations" section below.
+
+- dimension: objects with Dimension such as points, stars, and nodes.  The LatLng class in this package represents objects with latitude and longitude; this class comes with methods for calculating great-circle distance and tunnel (straight-line) distance.
+
+- graph: copied from Bacon, a bunch of classes representing vertices and edges of graphs.  Different types of edges include weighted/unweighted, directed/undirected.  The graph of nodes and ways, for example, would be a weighted and directed graph.  The DWGraph class also contains a builder that makes it easier to build your own graphs to test graph algorithms.
+
+- graphs: higher order concepts involving graphs, and graph algorithms.  For example, the Walk class encapsulates a sequence of vertices and edges such as the result of Dijkstra's algorithm.  The Graphs class contains graph algorithms, including Dijkstra's algorithm, Dijkstra's algorithm with A*, and Dijkstra's algorithm with A* that stops after searching a certain number of vertices (as noted above in "Known bugs").
+
+- kdtree: from Stars, but with some additions.  First, a LatLngKDTree that can handle LatLng objects.  For nearest neighbors and within radius queries, the main challenge is that longitude "wraps around": -180 longitude is the same as 180 longitude.  The way we handle this is that when we want to find the nearest neighbor from, for example, {lat=0, lng=160}, we actually run two nearest neighbors queries: one from the original point {lat=0, lng=160}, another from a "wrapped" point {lat=0, lng=-200}.  The wrapped point is obtained from the original point by adding or subtracting 360 to the longitude.  This way, neighbors with very high longitude and neighbors with very low longitude will both be considered.  We merge the results of these two queries with the private merge method.  Another addition to this package: KDNodeParallel, which supports constructing the kd-tree with multiple threads.  More on this in the "Runtime/space optimizations" section.
+
+- maps: the package with classes that relate most directly to the Maps project.  For example, classes like Node, Way, and TrafficClient.  Nodes and ways make use of the proxy pattern to reduce the number of database accesses.  The traffic client periodically queries the traffic server and updates the traffic values of Way objects--ways that haven't been created yet will be created and put in the cache, which is reasonable since the number of ways received from the traffic server is small compared to the total number of ways in the database.  Querying the traffic server is a synchronized method so we can make sure we don't query the traffic server while another thread is running Dijkstra's algorithm, for example.
+
+- pair: copied from Bacon (I think)--contains ordered/unordered pair abstractions.
+
+- stars: copied from Stars so the Stars tests still work.
+
+---
+Runtime/space optimizations
+---
+
+We made several runtime optimizations:
+
+- Database connections: we can't have multiple threads using a connection at the same time.  One solution to this problem would be to keep one open connection at all times and synchronize the query methods of the database class so multiple threads can't use the connection at once.  However, this would prevent multiple threads from reading the database simultaneously, which can be desirable (if some threads were writing to the database, then it would be a different story--but in the program, we're just reading).  So, in the Database class, we have a pool of available connections.  When a thread wants a connection, it calls Database.getConnection().  If there is an available connection in the pool, it is returned; otherwise the thread will have to wait.  There is a limit on the number of connections in the pool to increase efficiency of prepared statements.  To determine this limit, we tested the program, printing out different connections when they were created, and found that we almost always only created 2 connections.  So we decided that if we have up to 3 available connections, then our threads probably won't have to wait for any connections to become available.
+
+- Multithreaded kd-tree building: we decided to have 8 different threads working to build the kd-tree (8 = 2^3, so the third level of the kd-tree would be where different threads start working).  To do so, we made a KDNodeParallel class that supports having multiple threads build different branches.
+
+- Building kd-tree and trie in parallel: taking advantage of our database with multiple connections, the kd-tree and trie are setup in parallel because both ony require reading from the database.  If we had built these two data structures one after the other, setting up our program probably would have taken about twice as long.
+
+- Caching in the backend: same idea as in Bacon, cache nodes and ways that have already been looked up so we don't have to access the database more than we need to.  We keep a map from ID of node/way to the node/way object.
+
+- Caching in the frontend: when the frontend draws the streets, it needs information about the edges to display: the lat/lng of the start node, the lat/lng of the end node, and the traffic.  In the frontend, once we receive information about an edge, we cache it in a map that sends the way ID to the lat/long of the start/end nodes.  Then when the backend wants to send information about the edge again, it only needs to send the traffic rather than sending the coordinates of the endpoints again.  The backend keeps a set of way IDs that it has already sent.
+
+- Finding which edges to display: we kept track of the latitude and longitude of the center of the screen on the frontend, as well as the size of the screen in terms of latitude/longitude displayed.  To get all edges, we found all nodes that are displayed on screen and got all edges from those.  To find the nodes on the screen, we made use of the radius search of the kd-tree instead of looking in the database by using the distance from the center of the canvas to one of the corners as the radius; then we filtered out any nodes that fall within the radius but not within the rectangle of the canvas.  This is another way we reduce database accesses, made possible since we fully adapted our KDTree methods to handle latitude and longitude, not just the nearest neighbor method.
+
+---
+Some extra stuff
+---
+
+- We added a --traffic-port=port option that allows you to specify the port of the traffic server.  The default is 8080.
+
+---
+How to run tests
+---
+
+Our JUnit tests should run automatically when you run "mvn package".
+Our cs032_system_tester tests are in the tests directory.  We made some test databases in the files directory to test our program.
+
+---
+Tests you wrote and tried by hand
+---
+
+As mentioned a few times in the previous sections, sometimes we ran our program and printed out information about which resources were being used so we could try to make our program as efficient as possible.  For example, testing the number of database connections needed to eliminate most thread waiting time.
+
+Another quick note about tests: for some parts of the program such as the KDTree, we wrote oracles to help conduct even more automated testing beyond individual JUnit tests and cs032_system_tester tests.  By using our oracle, we determined that our KD-tree was working correctly when we made it handle latitude/longitude.
+
+---
+How to build/run from the command line
+---
+
+Build with "mvn package".
+Run with "./run [--traffic-port=port] [--gui] [databaseFile]"--to use traffic data, the traffic server should be started first.  The port of the traffic server can be specified with the optional --traffic-port argument; it defaults to 8080.
