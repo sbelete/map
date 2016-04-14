@@ -109,7 +109,7 @@ public class Main {
     /**
      * KD-tree parallel level, for efficiency.
      */
-    private static final int KD_TREE_PARALLEL_LEVEL = 3;
+    static final int KD_TREE_PARALLEL_LEVEL = 3;
 
     /**
      * Used in REPL: if input has no quotes, it splits into this many pieces.
@@ -125,12 +125,12 @@ public class Main {
      * Fail limit for Dijkstra search.  Prevents searching too many nodes if
      * start and end are disconnected.
      */
-    private static final double DIJKSTRA_FAIL = 10;
+    static final double DIJKSTRA_FAIL = 10;
     
     /**
      * Maximum number of vertices to search in Dijkstra.
      */
-    private static final int DIJKSTRA_MAX_VERTICES = 5000;
+    static final int DIJKSTRA_MAX_VERTICES = 5000;
 
     /**
      * Autocorrect.
