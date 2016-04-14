@@ -30,6 +30,8 @@ function setLocationStart(nodesJSON){
 		start_lat = nodesObject.lat;
 		start_lng = nodesObject.lng;
 		start_id  = nodesObject.id;
+		
+		
 	} else {
 		start_id = null;
 		start_lng = null;
@@ -129,6 +131,7 @@ function paint(nodesJSON){
 	// Edges in the shortest path
 	var pathEdges = nodesObject.pathEdges;
 	canvas.getContext("2d").clearRect(0, 0, canvasSize, canvasSize);
+	
 	for (i = 0; i < oldEdges.length; i++) {
 		var coords = cache[oldEdges[i][0]];
 		var traffic = oldEdges[i][1];
@@ -147,6 +150,29 @@ function paint(nodesJSON){
 		} else {
 			paintCoordsTraffic(coords, traffic, 3);
 		}
+	}
+	
+	if(start_id != null){
+		var c = canvas
+		var ctx = c.getContext("2d");
+		ctx.beginPath();
+		var x = (start_lng - latitude   + size/2) * (canvasSize/size);
+		var y = (start_lat - latitude   + size/2) * (canvasSize/size);
+		ctx.arc(x,y, 5,0,2*Math.PI);
+		context.fillStyle = 'blue';
+		context.fill();
+		ctx.stroke();
+	}
+	if(finish_id != null){
+		var c2 = canvas
+		var ctx2 = c2.getContext("2d");
+		ctx2.beginPath();
+		var x2 = (finish_lng - latitude   + size/2) * (canvasSize/size);
+		var y2 = (finish_lat - latitude   + size/2) * (canvasSize/size);
+		ctx2.arc(x2,x2, 5,0,2*Math.PI);
+		ctx2.fillStyle = 'blue';
+		ctx2.fill();
+		ctx2.stroke();
 	}
 };
 
@@ -189,35 +215,6 @@ canvas.addEventListener('mousewheel', function(event){
 }, false);
 
 
-function submitStart() {
-	   // Get the first form with the name
-	   var frm = document.getElementsById('start')[0];
-	   
-	   frm.reset();  // Reset
-	   return false; // Prevent page refresh
-};
-
-function clearDestination() {
-	   // Get the first form with the name
-	document.getElementById("myForm").reset();
-	   $.post("/clear", {}, paint);
-	   finish_id = null;
-	   finish_lat = null;
-	   finish_lng = null;
-	   paintEnter(false);
-	   return false; // Prevent page refresh
-};
-
-function submitDestination() {
-	   // Get the first form with the name
-	   var frm = document.getElementsById('destination')[0];
-	   
-	   var postParameters = {first_street : input1, second_street : input2};
-		$.post("/findIntersection", postParameters, setLocationStart);
-	   frm.reset();  // Reset
-	   return false; // Prevent page refresh
-};
-
 canvas.addEventListener("mousedown", function(event){
 	mouseDownX = event.clientX;
 	mouseDownY = event.clientY;
@@ -236,7 +233,8 @@ canvas.addEventListener("mouseup", function(event){
 
 // ========================= AUTO CORRECCT ================================
 //Input textbox
-var input1 = $("#street1"); //document.getElementsById("btnsubmit1"); //$("#input1");
+var input1 = $("#street1"); 
+
 // Suggestion textboxes
 var boxes1 =
     [$("#sug11"),
