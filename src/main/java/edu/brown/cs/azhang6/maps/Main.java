@@ -146,6 +146,8 @@ public class Main {
      */
     private final Map<String, Boolean> pathEdges = new HashMap<>();
 
+    public static boolean done = false;
+    
     /**
      * Runs application with command line arguments.
      *
@@ -427,6 +429,7 @@ public class Main {
         Spark.post("/findIntersection", new FindIntersectionHandler());
         // Autocorrect (Streetcorrect)
         Spark.post("/auto", new AutocorrectHandler());
+        done = true;
     }
 
     /**
@@ -465,6 +468,9 @@ public class Main {
             QueryParamsMap qm = req.queryMap();
             double latitude = Double.parseDouble(qm.value("lat"));
             double longitude = Double.parseDouble(qm.value("lon"));
+            System.out.println("nearestNeighbor");
+            System.out.println("latitude: " + latitude);
+            System.out.println("longitude: " + longitude);
             List<DimensionalDistance<Node>> nearestNeighbors
                 = nodes.nearestNeighbors(new LatLng(latitude, longitude), 1, null);
             Node nearestNeighbor = nearestNeighbors.get(0).getDimensional();
@@ -474,6 +480,8 @@ public class Main {
                 "id", nearestNeighbor.getId(),
                 "lat", nearestNeighbor.getLat(),
                 "lng", nearestNeighbor.getLng());
+            System.out.println("found nearest neighbor:");
+            System.out.println(variables);
             return GSON.toJson(variables);
         }
     }
@@ -495,7 +503,10 @@ public class Main {
             // Find shortest path
             QueryParamsMap qm = req.queryMap();
             String startId = qm.value("start_id");
-            String endId = qm.value("end_id");
+            String endId = qm.value("finish_id");
+            System.out.println("shortestPath");
+            System.out.println("startId: " + startId);
+            System.out.println("endId: " + endId);
             Node startNode = Node.of(startId);
             Node endNode = Node.of(endId);
             OrderedPair<Walk<Node, Way>, Double> shortestPath;
@@ -503,6 +514,7 @@ public class Main {
                 shortestPath = Graphs.dijkstraAStar(startNode, n -> endNode.equals(n),
                     n -> n.tunnelDistanceTo(endNode));
             }
+            System.out.println("found a shortest path of length: " + shortestPath.second());
 
             // Send information about shortest path
             List<Edge<Node, Way>> edges = shortestPath.first().getEdges();
@@ -731,6 +743,9 @@ public class Main {
             QueryParamsMap qm = req.queryMap();
             String way1Name = qm.value("first_street");
             String way2Name = qm.value("second_street");
+            System.out.println("findIntersection");
+            System.out.println("way1: " + way1Name);
+            System.out.println("way2: " + way2Name);
             Node intersection = NodeProxy.atIntersection(way1Name, way2Name);
 
             // Send information about intersection
@@ -746,6 +761,8 @@ public class Main {
                     "lat", intersection.getLat(),
                     "lng", intersection.getLng());
             }
+            System.out.println("found intersection:");
+            System.out.println(variables);
             return GSON.toJson(variables);
         }
     }
