@@ -791,8 +791,8 @@ public class Main {
         public synchronized Object handle(final Request req, final Response res) {
             // Get intersection
             QueryParamsMap qm = req.queryMap();
-            String way1Name = qm.value("first_street");
-            String way2Name = qm.value("second_street");
+            String way1Name = qm.value("street1");
+            String way2Name = qm.value("street2");
             System.out.println("findIntersection");
             System.out.println("way1: " + way1Name);
             System.out.println("way2: " + way2Name);

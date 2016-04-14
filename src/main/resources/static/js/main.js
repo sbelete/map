@@ -1,42 +1,39 @@
-var latitude = 41.8268;
-var longitude = -71.4025;
-var size = .001; // number of shown latitude
+var latitude = 41.8268;   // Latitude of the center of the board
+var longitude = -71.4025; // Longitude of the center of the board
 
-var MAX_SIZE = .01;
-var MIN_SIZE = .0005;
+var MAX_SIZE = .01;    // Maximum size the map will show
+var MIN_SIZE = .0005;  // Minimum size the map will show
+var size = .001;       // Size of Latitude and Longitude shown
+
 var canvas = $("#map")[0];
 var canvasSize = canvas.height;
 var submit = $("#submit")[0];
 
-var mouseDownX;
-var mouseDownY;
+var mouseDown = [null, null];  // Mouse Down X, Mouse Down Y
 
-var start_lat;
-var start_lng;
-var start_id;
-var finish_lat;
-var finish_lng;
-var finish_id;
+
+var start = [null, null, null];   // Start ID, Start Lat, Start Lng
+var finish = [null, null, null];  // Finish ID, Finish Lat, Finish Lng
 
 var cache = {};
 
 setInterval(repaint, 5000);
 repaint();
 
-function setLocationStart(nodesJSON){
-	var nodesObject = JSON.parse(nodesJSON);
-	
-	if(nodesObject.id != ""){
-		start_lat = nodesObject.lat;
-		start_lng = nodesObject.lng;
-		start_id  = nodesObject.id;
+// Sets the endpoint to either start or finish
+function setEndpoint(endpointObject, endpoint){
+	if (endpointObject.id != "") {
+		endpoint[0] = endpointObject.id;
+		endpoint[1] = endpointObject.lat;
+		endpoint[2] = endpointObject.lng;
 	} else {
-		start_id = null;
-		start_lng = null;
-		start_lat  = null;
+		endpoint[0] = null;
+		endpoint[1] = null;
+		endpoint[2] = null;
 	}
 	repaint();
 };
+
 
 function setLocationFinish(nodesJSON){
 	var nodesObject = JSON.parse(nodesJSON);
@@ -52,6 +49,14 @@ function setLocationFinish(nodesJSON){
 	}
 	repaint();
 };
+function toCartesian(xyz, l){
+
+};
+
+function toCoordinates(l, xyz){
+
+
+};
 
 function mouseDrag(deltaX, deltaY){
 	latitude = latitude + (-deltaY/canvasSize) * size;
@@ -65,63 +70,67 @@ function nearestNode(x, y){
 	var lon = x*(size/canvasSize) - size/2 + longitude;
 	var lat = (canvasSize - y)*(size/canvasSize) - size/2 + latitude;
 	
+
 	var postParameters = {lat : lat, lon: lon};
-	if(start_id == null){
-		$.post("/nearestNeighbor", postParameters, setLocationStart);
+	if(start[0] == null){
+		$.post("/nearestNeighbor", postParameters, function(nodesJSON){
+			setEndpoint(JSON.parse(nodesJSON), start);
+		});
 	} else {
-		$.post("/nearestNeighbor", postParameters, setLocationFinish);
+		$.post("/nearestNeighbor", postParameters, function(nodesJSON){
+			setEndpoint(JSON.parse(nodesJSON), finish);
+		});
 	}
 };
 
-function textEnter1(){
-	var postParameters = {first_street : input1[0].value, second_street : input2[0].value};
-	$.post("/findIntersection", postParameters, setLocationStart);
+function textEnterS(){
+	var postParameters = {street1 : inputS1[0].value, street2 : inputS2[0].value};
+	$.post("/findIntersection", postParameters, function(nodesJSON){
+			setEndpoint(JSON.parse(nodesJSON), start);
+	});
 };
 
-function clearText1() {
-	   // Get the first form with the name
-		input1[0].value = "";
-		input2[0].value = "";
-	 
-	   $.post("/clear", {}, paint);
-	   start_id = null;
-	   start_lat = null;
-	   start_lng = null;
-	   repaint();
+function textEnterF(){
+	var postParameters = {street1 : inputF1[0].value, street2 : inputF2[0].value};
+	$.post("/findIntersection", postParameters, function(nodesJSON){
+			setEndpoint(JSON.parse(nodesJSON), finish);
+	});
 };
 
-function textEnter2(){
-	var postParameters = {first_street :input3[0].value, second_street : input4[0].value};
-	$.post("/findIntersection", postParameters, setLocationFinish);
+function clearText(endpoint){
+	endpoint[0] = null;
+	endpoint[1] = null;
+	endpoint[2] = null;
+
+	$.post("/clear", {}, repainter);
 };
 
+function clearTextS() {
+	inputS1[0].value = "";
+	inputS2[0].value = "";
+	clearText(start);
+};
 
-function clearText2() {
-	   // Get the first form with the name
-		input3[0].value = "";
-		input4[0].value = "";
-	 
-	   $.post("/clear", {}, paint);
-	   finish = null;
-	   finish_lat = null;
-	   finish_lng = null;
-	   repaint();
+function clearTextF() {
+	inputF1[0].value = "";
+	inputF2[0].value = "";
+	clearText(finish)
 };
 
 
-function shortestPath(){
-	if(start_id != null && finish_id != null){
-		var postParameters = {start_id : start_id, finish_id : finish_id};
-		$.post("/shortestPath", postParameters, paint);
+function shortestPath() {
+	if(start[0] != null && finish[0] != null){
+		var postParameters = {start_id : start[0], finish_id : finish[0]};
+		$.post("/shortestPath", postParameters, repainter);
 	}
 };
 
 function repaint(){
 	var postParameters = {lat : latitude, lon : longitude, s : size};
-	$.post("/getEdges", postParameters, paint);
+	$.post("/getEdges", postParameters, repainter);
 };
 
-function paint(nodesJSON){
+function repainter(nodesJSON){
 	var nodesObject = JSON.parse(nodesJSON);
 	// Array of 2-element arrays: first is ID, second is traffic
 	var oldEdges = nodesObject.oldEdges;
@@ -132,7 +141,7 @@ function paint(nodesJSON){
 	// Edges in the shortest path
 	var pathEdges = nodesObject.pathEdges;
 	canvas.getContext("2d").clearRect(0, 0, canvasSize, canvasSize);
-	
+
 	for (i = 0; i < oldEdges.length; i++) {
 		var coords = cache[oldEdges[i][0]];
 		var traffic = oldEdges[i][1];
@@ -153,37 +162,60 @@ function paint(nodesJSON){
 		}
 	}
 	
-	if(start_id != null){
+	if(start[0] != null){
 		var c = canvas
 		var ctx = c.getContext("2d");
 		ctx.beginPath();
-		var x = (start_lng - longitude   + size/2) * (canvasSize/size);
-		var y = (start_lat - latitude   + size/2) * (canvasSize/size);
+		var x = (start[2] - longitude   + size/2) * (canvasSize/size);
+		var y = (start[1] - latitude   + size/2) * (canvasSize/size);
 		ctx.arc(x,canvasSize - y, 5,0,2*Math.PI);
 		ctx.fillStyle = 'blue';
 		ctx.fill();
 		ctx.stroke();
 	}
-	if(finish_id != null){
+	if(finish[0] != null){
 		var c2 = canvas
 		var ctx2 = c2.getContext("2d");
 		ctx2.beginPath();
-		var x2 = (finish_lng - longitude   + size/2) * (canvasSize/size);
-		var y2 = (finish_lat - latitude   + size/2) * (canvasSize/size);
+		var x2 = (finish[2] - longitude   + size/2) * (canvasSize/size);
+		var y2 = (finish[1] - latitude   + size/2) * (canvasSize/size);
 		ctx2.arc(x2,canvasSize - y2, 5,0,2*Math.PI);
 		ctx2.fillStyle = 'blue';
 		ctx2.fill();
 		ctx2.stroke();
+
+
+
+	if(start[0] != null){
+		drawEndpoint(start);
+
 	}
+
+	if(finish[0] != null){
+		drawEndpoint(finish);
+	} 
 };
+
+function drawEndpoint(endpoint) {
+	var x = (endpoint[1] - longitude   + size/2) * (canvasSize/size);
+	var y = (endpoint[0] - latitude   + size/2) * (canvasSize/size);
+	
+	var ctx = canvas.getContext("2d");
+	ctx.beginPath();
+	ctx.arc(x, y, 5, 0, 2*Math.PI);
+	ctx.fillStyle = 'blue';
+	ctx.fill();
+	ctx.stroke();
+};
+
 
 // Paints an edge with the given coordinates array and traffic value
 function paintCoordsTraffic(coords, traffic, lineWidth) {
 	paint_helper(
 		(coords[0] - latitude   + size/2) * (canvasSize/size),
-		(coords[1] - longitude + size/2) * (canvasSize/size), 
-		(coords[2] - latitude   + size/2) * (canvasSize/size), 
-		(coords[3] - longitude + size/2) * (canvasSize/size), 
+		(coords[1] - longitude + size/2) * (canvasSize/size),
+		(coords[2] - latitude   + size/2) * (canvasSize/size),
+		(coords[3] - longitude + size/2) * (canvasSize/size),
 		traffic, lineWidth);
 }
 
@@ -206,36 +238,38 @@ function paint_helper(y1, x1, y2, x2, weight, lineWidth) {
 
 canvas.addEventListener('mousewheel', function(event){
 	var temp = size - 0.00000833333*event.wheelDelta;
-	
+
 	if(temp < MAX_SIZE && temp > MIN_SIZE){
 		size = temp;
 	}
-	
+
 	repaint();
 	return false;
 }, false);
 
-
 canvas.addEventListener("mousedown", function(event){
-	mouseDownX = event.clientX;
-	mouseDownY = event.clientY;
+	mouseDown[0] = event.clientX;
+	mouseDown[1] = event.clientY;
 });
 
 canvas.addEventListener("mouseup", function(event){
-	var deltaX = event.clientX - mouseDownX;
-	var deltaY = mouseDownY - event.clientY;
+	var deltaX = event.clientX - mouseDown[0];
+	var deltaY = mouseDown[1] - event.clientY;
+
 	if(deltaX == 0 && deltaY == 0){
 		var canvasBox = canvas.getBoundingClientRect();
-		nearestNode(mouseDownX - canvasBox.left, mouseDownY - canvasBox.top);
+
+		nearestNode(mouseDown[0] - canvasBox.left, mouseDown[1] - canvasBox.top);
+
 	} else{
 		mouseDrag(deltaX, deltaY);
 	}
-	
 });
 
 // ========================= AUTO CORRECCT ================================
+
 //Input textbox
-var input1 = $("#street1"); 
+var inputS1 = $("#streetS1");
 
 // Suggestion textboxes
 var boxes1 =
@@ -246,7 +280,7 @@ var boxes1 =
     $("#sug15")];
 
 // Input textbox
-var input2 = $("#street2");
+var inputS2 = $("#streetS2");
 // Suggestion textboxes
 var boxes2 =
     [$("#sug21"),
@@ -256,7 +290,7 @@ var boxes2 =
     $("#sug25")];
 
     // Input textbox
-    var input3 = $("#street3");
+    var inputF1 = $("#streetF1");
     // Suggestion textboxes
     var boxes3 =
         [$("#sug31"),
@@ -266,7 +300,7 @@ var boxes2 =
         $("#sug35")];
 
     // Input textbox
-    var input4 = $("#street4");
+    var inputF2 = $("#streetF2");
     // Suggestion textboxes
     var boxes4 =
         [$("#sug41"),
@@ -283,14 +317,14 @@ var noSuggestionColor = "rgb(200, 200, 200)";
 var highlightedColor = "orange";
 
 // When the input text box is updated, get suggestions
-input1.on("keyup", getSuggestions1);
-input1.keyup(function(e){
+inputS1.on("keyup", getSuggestions1);
+inputS1.keyup(function(e){
     console.log(e);
     $('#autocomplete1').val($(this).val() + 'asdf')
 });
 // Makes a post request to get suggestions for input
 function getSuggestions1() {
-    var postParameters = {input: input1[0].value, on: true};
+    var postParameters = {input: inputS1[0].value, on: true};
     $.post("/auto", postParameters, showSuggestions1);
 }
 
@@ -346,18 +380,18 @@ boxes1.forEach(function(box) {
     box.on("click", function() {
         if (box[0].style.backgroundColor === suggestionColor
                 || box[0].style.backgroundColor === highlightedColor) {
-            input1[0].value = box[0].value;
+            inputS1[0].value = box[0].value;
             getSuggestions1();
         }
     });
 });
 
 // When the input text box is updated, get suggestions
-input2.on("keyup", getSuggestions2);
+inputS2.on("keyup", getSuggestions2);
 
 // Makes a post request to get suggestions for input
 function getSuggestions2() {
-    var postParameters = {input: input2[0].value, on: true};
+    var postParameters = {input: inputS2[0].value, on: true};
     $.post("/auto2", postParameters, showSuggestions2);
 }
 
@@ -413,18 +447,18 @@ boxes2.forEach(function(box) {
     box.on("click", function() {
         if (box[0].style.backgroundColor === suggestionColor
                 || box[0].style.backgroundColor === highlightedColor) {
-            input2[0].value = box[0].value;
+            inputS2[0].value = box[0].value;
             getSuggestions2();
         }
     });
 });
 
 // When the input text box is updated, get suggestions
-input3.on("keyup", getSuggestions3);
+inputF1.on("keyup", getSuggestions3);
 
 // Makes a post request to get suggestions for input
 function getSuggestions3() {
-    var postParameters = {input: input3[0].value, on: true};
+    var postParameters = {input: inputF1[0].value, on: true};
     $.post("/auto", postParameters, showSuggestions3);
 }
 
@@ -480,18 +514,18 @@ boxes3.forEach(function(box) {
     box.on("click", function() {
         if (box[0].style.backgroundColor === suggestionColor
                 || box[0].style.backgroundColor === highlightedColor) {
-            input3[0].value = box[0].value;
+            inputF1[0].value = box[0].value;
             getSuggestions3();
         }
     });
 });
 
 // When the input text box is updated, get suggestions
-input4.on("keyup", getSuggestions4);
+inputF2.on("keyup", getSuggestions4);
 
 // Makes a post request to get suggestions for input
 function getSuggestions4() {
-    var postParameters = {input: input4[0].value, on: true};
+    var postParameters = {input: inputF2[0].value, on: true};
     $.post("/auto", postParameters, showSuggestions4);
 }
 
@@ -547,7 +581,7 @@ boxes4.forEach(function(box) {
     box.on("click", function() {
         if (box[0].style.backgroundColor === suggestionColor
                 || box[0].style.backgroundColor === highlightedColor) {
-            input4[0].value = box[0].value;
+            inputF2[0].value = box[0].value;
             getSuggestions4();
         }
     });
