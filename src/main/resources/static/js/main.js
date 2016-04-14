@@ -297,13 +297,16 @@ inputS1.keyup(function(e){
 });
 // Makes a post request to get suggestions for input
 function setSuggestions(listSuggest, suggestions) {
+	
+	console.log("In Suggestions");
 	var i;
-	for(i = 0; i > 5 && i > listSuggest.size; i++){
-
-		suggestions[i] = listSuggest[i];
+	for(i = 0; i < 5 && i < listSuggest.length; i++){
+		console.log(listSuggest[i]);
+		suggestions[i][0].value = listSuggest[i];
 	}
 	
-	for(i; i > 5; i++){
+	for(i; i < 5; i++){
+		console.log("Empty");
 		suggestions[i] ="";
 	}
 };
