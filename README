@@ -16,6 +16,8 @@ The implementation of Dijkstra's algorithm used in the program allows you to sto
 
 Not really a bug, but an area of improvement: when the user clicks on the map and we find the nearest neighbor, we just find the nearest neighbor out of all nodes in the map.  It would have been better to exclude nodes that are at the intersection of two residential ways, because often these nodes won't have any paths to other nodes.
 
+Another area of improvement: it's possible for a 2-way street to have different traffic value along the two directions.  The way we draw streets right now, a 2-way street would be drawn as two lines that overlap, so only the color of the most recently drawn line would show.  An improvement might be having a slight offset for 2-way streets--one street would be shifted slightly to the left, the other slightly to the right--so both streets would be displayed.
+
 ---
 Design details
 ---
@@ -78,6 +80,8 @@ Tests you wrote and tried by hand
 ---
 
 As mentioned a few times in the previous sections, sometimes we ran our program and printed out information about which resources were being used so we could try to make our program as efficient as possible.  For example, testing the number of database connections needed to eliminate most thread waiting time.
+
+Another test done by hand: testing that updating traffic works on the frontend.  We chose to color lines green if they had low traffic (less than 2), yellow for medium (2 to 5), and red for high.  Since we only receive a few edges from the traffic server (compared to the total number of ways), sometimes when we run the program everything just appears green.  To test that our display really was working, we changed the Javascript in the browser to change the thresholds (so for example, everything more than 1 turns yellow), and we saw the changes we wanted.
 
 Another quick note about tests: for some parts of the program such as the KDTree, we wrote oracles to help conduct even more automated testing beyond individual JUnit tests and cs032_system_tester tests.  By using our oracle, we determined that our KD-tree was working correctly when we made it handle latitude/longitude.
 

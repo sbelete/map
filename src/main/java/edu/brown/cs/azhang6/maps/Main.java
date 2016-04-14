@@ -10,6 +10,7 @@ import java.util.Map;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
+import edu.brown.cs.azhang6.autocorrect.Autocorrect;
 import edu.brown.cs.azhang6.db.Database;
 import edu.brown.cs.azhang6.dimension.Dimensional;
 import edu.brown.cs.azhang6.dimension.DimensionalDistance;
@@ -134,7 +135,7 @@ public class Main {
     /**
      * Autocorrect.
      */
-    private StreetComplete corrector;
+    private Autocorrect corrector;
 
     /**
      * IDs of ways that have already been sent to the frontend.
@@ -288,7 +289,7 @@ public class Main {
         try (PreparedStatement prep = conn.prepareStatement(
             "SELECT name FROM way;")) {
             List<String> streets = db.query(prep);
-            corrector = new StreetComplete(streets, streets);
+            corrector = new Autocorrect(streets);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
@@ -663,9 +664,12 @@ public class Main {
             QueryParamsMap qm = req.queryMap();
             String streetName = qm.value("street_name");
             List<String> suggestions = corrector.suggest(streetName);
-
+            List<String> trimmedSuggestions = new ArrayList<>();
+            for (int i = 0; i < suggestions.size() && i < 5; i++) {
+                trimmedSuggestions.add(suggestions.get(i));
+            }
             List<Object> variables
-                = ImmutableList.of(suggestions.subList(0, 4));
+                = ImmutableList.of(trimmedSuggestions);
 
             return GSON.toJson(variables);
         }

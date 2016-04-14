@@ -187,6 +187,7 @@ public class Autocorrect extends Trie {
 		if (contains(word)) {
 			suggestions.add(word);
 		}
+
 		
 			suggestions.addAll(autocomplete(word));
 	
