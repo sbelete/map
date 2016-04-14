@@ -20,12 +20,6 @@ import java.util.concurrent.TimeUnit;
 public class TrafficClient {
     
     /**
-     * Map from way ID to traffic.  Concurrent because one thread might be
-     * writing to it and another thread might be reading from it.
-     */
-    private final Map<String, Double> traffic = new ConcurrentHashMap<>();
-    
-    /**
      * URL of traffic server, without the timestamp.
      */
     private final String url;
@@ -67,29 +61,10 @@ public class TrafficClient {
             for(Object[] wayTraffic : response) {
                 String way = (String) wayTraffic[0];
                 double trafficValue = (double) wayTraffic[1];
-                traffic.put(way, trafficValue);
+                Way.of(way).setTraffic(trafficValue);
             }
         }
         lastTimestamp = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
-    }
-    
-    /**
-     * Gets traffic for a given way.
-     * 
-     * @param wayId way ID
-     * @return traffic
-     */
-    public double getTraffic(String wayId) {
-        return traffic.getOrDefault(wayId, 1D);
-    }
-    
-    /**
-     * Gets all traffic.
-     * 
-     * @return traffic
-     */
-    public Map<String, Double> getTraffic() {
-        return Collections.unmodifiableMap(traffic);
     }
     
     /**

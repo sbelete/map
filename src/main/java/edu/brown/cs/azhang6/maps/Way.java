@@ -14,11 +14,6 @@ public class Way {
      * Cache of ways. Map from ID to way.
      */
     private static HashMap<String, Way> cache = new HashMap<>();
-    
-    /**
-     * Traffic client.
-     */
-    private static TrafficClient traffic;
 
     /**
      * ID.
@@ -44,6 +39,16 @@ public class Way {
      * Type.
      */
     protected String type;
+    
+    /**
+     * Distance between start and end nodes, not including traffic.
+     */
+    private double distance = -1;
+    
+    /**
+     * Traffic multiplier.
+     */
+    private double traffic = 1;
 
     /**
      * New way with ID, start, end, name, and type.
@@ -69,15 +74,6 @@ public class Way {
      */
     public Way(String id) {
         this(id, null, null, null, null);
-    }
-    
-    /**
-     * Sets traffic client.
-     * 
-     * @param traffic traffic client
-     */
-    public static void setTrafficClient(TrafficClient traffic) {
-        Way.traffic = traffic;
     }
 
     /**
@@ -123,7 +119,7 @@ public class Way {
      * @return length including traffic
      */
     public double length() {
-        return distance() * traffic();
+        return getDistance() * getTraffic();
     }
     
     /**
@@ -131,8 +127,12 @@ public class Way {
      * 
      * @return distance
      */
-    public double distance() {
-        return Node.of(getStart()).distanceTo(Node.of(getEnd()));
+    public double getDistance() {
+        if (distance != -1) {
+            return distance;
+        }
+        distance = Node.of(getStart()).distanceTo(Node.of(getEnd()));
+        return distance;
     }
     
     /**
@@ -140,8 +140,17 @@ public class Way {
      * 
      * @return traffic
      */
-    public double traffic() {
-        return traffic == null ? 1 : traffic.getTraffic(id);
+    public double getTraffic() {
+        return traffic;
+    }
+    
+    /**
+     * Sets traffic.
+     * 
+     * @param traffic traffic
+     */
+    public void setTraffic(double traffic) {
+        this.traffic = traffic;
     }
 
     /**

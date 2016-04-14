@@ -60,7 +60,7 @@ function setLocationFinish(nodesJSON){
 
 function mouseDrag(deltaX, deltaY){
 	latitude = latitude + (deltaY/canvasSize) * size;
-	var degreeLong = size * 110.574 / (111.320 * cos(latitude));
+	var degreeLong = size * 110.574 / (111.320 * Math.cos(latitude));
 	longitude = longitude + (deltaX/canvasSize) * degreeLong;
 	
 	updateNodes();
@@ -102,8 +102,7 @@ function repaint(){
 
 function paint(nodesJSON){
 	var nodesObject = JSON.parse(nodesJSON);
-	// var edgeArr = nodesObject.shownEdges;
-	// var pathArr = nodesObject.pathEdges;
+	console.log(nodesObject);
 
 	// Array of 2-element arrays: first is ID, second is traffic
 	var oldEdges = nodesObject.oldEdges;
@@ -111,11 +110,11 @@ function paint(nodesJSON){
 	var newEdges = nodesObject.newEdges;
 	// Array of 4-element arrays: lat/lng of start/end
 	var newCoords = nodesObject.newCoords;
-	// Array of 2-element arrays: first is ID, second is traffic
+	// Edges in the shortest path
 	var pathEdges = nodesObject.pathEdges;
 	canvas.getContext("2d").clearRect(0, 0, canvasSize, canvasSize);
 
-	for (int i = 0; i < oldEdges.length; i++) {
+	for (i = 0; i < oldEdges.length; i++) {
 		var coords = cache[oldEdges[i][0]];
 		var traffic = oldEdges[i][1];
 		if (pathEdges[oldEdges[i][0]] == null) {
@@ -124,12 +123,12 @@ function paint(nodesJSON){
 			paintCoordsTraffic(coords, traffic, 3);
 		}
 	}
-	for (int i = 0; i < newEdges.length; i++) {
-		var coords = newCoords[i];
-		cache[newEdges[i][0]] = coords;
-		var traffic = newEdges[i][1];
-		if (pathEdges[newEdges[i][0]] == null) {
-			printCoordsTraffic(coords, traffic, 1);
+	for (j = 0; j < newEdges.length; j++) {
+		var coords = newCoords[j];
+		cache[newEdges[j][0]] = coords;
+		var traffic = newEdges[j][1];
+		if (pathEdges[newEdges[j][0]] == null) {
+			paintCoordsTraffic(coords, traffic, 1);
 		} else {
 			paintCoordsTraffic(coords, traffic, 3);
 		}
@@ -220,7 +219,7 @@ function paint_helper_path(y1, x1, y2, x2, weight){
 */
 
 canvas.addEventListener('mousewheel', function(event){
-	size = size + 0.00000833333*event.originalEvent.wheelDelta;
+	size = size + 0.00000833333*event.wheelDelta;
 	updateNodes();
 	return false;
 }, false);

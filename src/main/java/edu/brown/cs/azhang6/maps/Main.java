@@ -31,6 +31,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
@@ -119,14 +122,29 @@ public class Main {
     private StreetComplete corrector;
 
     /**
-     * Edges shown on screen.
+     * IDs of ways that have already been sent to the frontend.
      */
-    private double[][] shownEdges = new double[0][];
+    private final Set<String> sentWays = new HashSet<>();
+    
+    /**
+     * Old edges.
+     */
+    private final List<Object[]> oldEdges = new ArrayList<>();
+    
+    /**
+     * New edges.
+     */
+    private final List<Object[]> newEdges = new ArrayList<>();
+    
+    /**
+     * Coordinates of new edges.
+     */
+    private final List<double[]> newCoords = new ArrayList<>();
 
     /**
-     * Edges shown on screen that are part of a shortest path.
+     * Edges in shortest path.
      */
-    private double[][] pathEdges = new double[0][];
+    private final Map<String, Boolean> pathEdges = new HashMap<>();
 
     /**
      * Runs application with command line arguments.
@@ -166,11 +184,11 @@ public class Main {
                 System.exit(1);
             }
             if (options.has("help")) {
-                // Exit if --help is given
                 parser.printHelpOn(System.out);
                 System.out.println(USAGE);
                 System.exit(0);
             }
+
             // Build database
             try {
                 db = new Database(dbString);
@@ -189,16 +207,12 @@ public class Main {
             } catch (ClassNotFoundException | SQLException e) {
                 System.out.println("ERROR: couldn't load database");
             }
+
             // Setup traffic server
-            try {
-                traffic = new TrafficClient(String.format(
-                    "http://localhost:%d?last=", TRAFFIC_PORT));
-                Way.setTrafficClient(traffic);
-                traffic.query();
-                traffic.start(TRAFFIC_QUERY_RATE);
-            } catch (IOException e) {
-                System.out.println("ERROR: couldn't connect to traffic server");
-            }
+            traffic = new TrafficClient(String.format(
+                "http://localhost:%d?last=", TRAFFIC_PORT));
+            traffic.start(TRAFFIC_QUERY_RATE);
+
             // Whether to run GUI or REPL
             if (options.has("gui")) {
                 runSparkServer();
@@ -409,6 +423,7 @@ public class Main {
         Spark.post("/getEdges", new GetEdgesHandler());
         // Clear shortest path
         Spark.post("/clear", new ClearHandler());
+        // Find intersection of two streets
         Spark.post("/findIntersection", new FindIntersectionHandler());
         // Autocorrect (Streetcorrect)
         Spark.post("/auto", new AutocorrectHandler());
@@ -490,20 +505,18 @@ public class Main {
             }
 
             // Send information about shortest path
-            List<Vertex<Node, Way>> vertices = shortestPath.first().getVertices();
             List<Edge<Node, Way>> edges = shortestPath.first().getEdges();
-            pathEdges = new double[edges.size()][];
-            for (int i = 0; i < edges.size(); i++) {
-                Node v1 = vertices.get(i).getValue().get();
-                Node v2 = vertices.get(i + 1).getValue().get();
-                pathEdges[i] = new double[]{
-                    v1.getLat(), v1.getLng(), v2.getLat(), v2.getLng(),
-                    edges.get(i).getValue().get().traffic()
-                };
-            }
+            pathEdges.clear();
+            edges.forEach(e -> pathEdges.put(e.getValue().get().getId(), true));
+            oldEdges.addAll(newEdges);
+            newEdges.clear();
+            newCoords.clear();
             Map<String, Object> variables = ImmutableMap.of(
-                "shownEdges", shownEdges,
-                "pathEdges", pathEdges);
+                "oldEdges", oldEdges,
+                "newEdges", newEdges,
+                "newCoords", newCoords,
+                "pathEdges", pathEdges
+            );
             return GSON.toJson(variables);
         }
     }
@@ -522,35 +535,45 @@ public class Main {
          */
         @Override
         public Object handle(final Request req, final Response res) {
+            long millisBefore = System.currentTimeMillis();
             QueryParamsMap qm = req.queryMap();
             double latitude = Double.parseDouble(qm.value("lat"));
             double longitude = Double.parseDouble(qm.value("lon"));
             double size = Double.parseDouble(qm.value("s"));
-            // Get all points that should be displayed
+            // Get all edges that should be displayed
             LatLngSize box = new LatLngSize(latitude, longitude, size);
             List<DimensionalDistance<Node>> withinRadius
                 = nodes.withinRadius(new LatLng(latitude, longitude), box.radius, null);
             List<Node> displayedNodes = withinRadius.stream()
                 .map(dd -> dd.getDimensional())
                 .filter(ll -> box.contains(ll)).collect(Collectors.toList());
-            // Get all edges that should be displayed
-            List<Edge<Node, Way>> displayedEdges = new ArrayList<>();
-            displayedNodes.forEach(n -> displayedEdges.addAll(n.getDWEdges()));
-
-            // Send information about shown edges
-            shownEdges = new double[displayedEdges.size()][];
-            for (int i = 0; i < shownEdges.length; i++) {
-                Edge<Node, Way> e = displayedEdges.get(i);
-                Node v1 = e.getEndpoints().s().getValue().get();
-                Node v2 = e.getEndpoints().t().getValue().get();
-                shownEdges[i] = new double[]{
-                    v1.getLat(), v1.getLng(), v2.getLat(), v2.getLng(),
-                    e.getValue().get().traffic()
-                };
+            List<Edge<Node, Way>> edges = new ArrayList<>();
+            displayedNodes.forEach(n -> edges.addAll(n.getDWEdges()));
+            // Send information about edges
+            oldEdges.clear();
+            newEdges.clear();
+            newCoords.clear();
+            for (int i = 0; i < edges.size(); i++) {
+                Way e = edges.get(i).getValue().get();
+                if (sentWays.contains(e.getId())) {
+                    oldEdges.add(new Object[]{e.getId(), e.getTraffic()});
+                } else {
+                    newEdges.add(new Object[]{e.getId(), e.getTraffic()});
+                    Node v1 = edges.get(i).getEndpoints().s().getValue().get();
+                    Node v2 = edges.get(i).getEndpoints().t().getValue().get();
+                    newCoords.add(new double[] {
+                        v1.getLat(), v1.getLng(), v2.getLat(), v2.getLng()});
+                    sentWays.add(e.getId());
+                }
             }
             Map<String, Object> variables = ImmutableMap.of(
-                "shownEdges", shownEdges,
-                "pathEdges", pathEdges);
+                "oldEdges", oldEdges,
+                "newEdges", newEdges,
+                "newCoords", newCoords,
+                "pathEdges", pathEdges
+            );
+            long millisAfter = System.currentTimeMillis();
+            System.out.println(millisAfter - millisBefore);
             return GSON.toJson(variables);
         }
     }
@@ -679,10 +702,16 @@ public class Main {
          */
         @Override
         public Object handle(final Request req, final Response res) {
-            pathEdges = new double[0][];
+            pathEdges.clear();
+            oldEdges.addAll(newEdges);
+            newEdges.clear();
+            newCoords.clear();
             Map<String, Object> variables = ImmutableMap.of(
-                "shownEdges", shownEdges,
-                "pathEdges", pathEdges);
+                "oldEdges", oldEdges,
+                "newEdges", newEdges,
+                "newCoords", newCoords,
+                "pathEdges", pathEdges
+            );
             return GSON.toJson(variables);
         }
     }
