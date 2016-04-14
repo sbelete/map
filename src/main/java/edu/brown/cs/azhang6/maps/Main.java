@@ -664,9 +664,12 @@ public class Main {
             QueryParamsMap qm = req.queryMap();
             String streetName = qm.value("street_name");
             List<String> suggestions = corrector.suggest(streetName);
-
+            List<String> trimmedSuggestions = new ArrayList<>();
+            for (int i = 0; i < suggestions.size() && i < 5; i++) {
+                trimmedSuggestions.add(suggestions.get(i));
+            }
             List<Object> variables
-                = ImmutableList.of(suggestions.subList(0, 4));
+                = ImmutableList.of(trimmedSuggestions);
 
             return GSON.toJson(variables);
         }
