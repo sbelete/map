@@ -82,7 +82,7 @@ function textEnter2(){
 };
 
 function shortestPath(){
-	if(start_id == null || finish_id == null){
+	if(start_id != null || finish_id != null){
 		var postParameters = {start_id : start_id, finish_id : finish_id};
 		$.post("/shortestPath", postParameters, paint);
 	}
