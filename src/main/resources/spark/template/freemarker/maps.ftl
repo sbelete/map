@@ -19,7 +19,7 @@
 </form>
 
 <br><br>
-<form class="destination">
+<form id = "destination" class="destination">
    Start Street 1: 
    <input type="text" name="finish_street_1">
   <br><br>
