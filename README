@@ -1,6 +1,14 @@
 Simon Belete (sbelete) and Aaron Zhang (azhang6)
 
 ---
+Checkstyle appeals
+---
+
+- Visibility modifier: same as in Bacon--some classes in my graph package are meant to be overriden, so some fields are marked protected instead of private.
+- Import order
+- Javadoc method: same as in Bacon--in the Javadoc, I sometimes include @throws tags for unchecked exceptions because they are informative.  I'm getting the checkstyle error because I don't declare "throws ..." in the method signature.  But if I do declare "throws ..." in the method signature, checkstyle gives me a different error for declaring an unchecked exception.  So I have to get one error or the other.
+
+---
 Which partner's projects were used
 ---
 
