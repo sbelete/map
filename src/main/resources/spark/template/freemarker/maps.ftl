@@ -33,10 +33,10 @@ Start Street 2: <input list="autoS2" type="text"  id ="streetS2" name="streetS2"
 <button id="submitS" onclick="textEnterS()"> Submit </button>
 <button id="clearS" onclick="clearTextS()"> Clear </button>
 <br><br>
-<button id="gos" style= "color:red" onclick="goToStart()"/> Go to Start </button>
+<button id="gts" style= "color:red" onclick="goToStart()"/> Go to Start </button>
 <br>
 <div id= "div3">
-Destination Street 1: <input list="autoF1" type="text"  id ="streetF1" name="streetF1" value=""/><br><br>
+Destination Street 1: <input list="autoF1" type="text"  id ="streetF1" name="streetF1" value=""/><br>
 <datalist id="autoF1">
     <option id ="suggestF11" value=""/>
     <option id ="suggestF12" value=""/>
@@ -61,11 +61,12 @@ Destination Street 2: <input list="autoF2" type="text"  id ="streetF2" name="str
 <button  id="clearF" onclick="clearTextF()"> Clear </button>
 <br><br>
 <button id="gtd" style= "color:red" onclick="goToDest()"/> Go to Destination </button>
-<br><br><br>
+<br><br>
 
 <div id= "enter">
 <button id = "enter" style= "color:red" onclick="shortestPath()"/>Enter</button>
 </div>
+<p id="enterMessages"></p>
 
 </div>
 

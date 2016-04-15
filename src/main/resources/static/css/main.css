@@ -20,14 +20,14 @@
 
 #forms {
 	position: absolute;
-	top : 75px;
+	top : 65px;
 	left :650px;
 }
 
 
 #word_maps {
 	position: absolute;
-	top :  0px;
+	top :  -20px;
 	left : 650px; 
 	font-size : 50px;
 }

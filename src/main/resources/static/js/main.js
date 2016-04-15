@@ -3,7 +3,7 @@ var longitude = -71.4025; // Longitude of the center of the board
 
 var MAX_SIZE = .01;    // Maximum size the map will show
 var MIN_SIZE = .0005;  // Minimum size the map will show
-var size = .001;       // Size of Latitude and Longitude shown
+var size = .005;       // Size of Latitude and Longitude shown
 
 var canvas = $("#map")[0];
 var canvasSize = canvas.height;
@@ -148,6 +148,16 @@ function repainter(nodesJSON){
 	var newCoords = nodesObject.newCoords;
 	// Edges in the shortest path
 	var pathEdges = nodesObject.pathEdges;
+	var length = nodesObject.length;
+	console.log(pathEdges);
+	if(jQuery.isEmptyObject(pathEdges)){
+		document.getElementById("enterMessages").innerHTML = 'There isn\'t a path';
+	} else {
+		console.log(length);
+		var message = 'This path in km is '.concat(String(length));
+		document.getElementById("enterMessages").innerHTML = message;
+	}
+	
 	canvas.getContext("2d").clearRect(0, 0, canvasSize, canvasSize);
 
 	for (i = 0; i < oldEdges.length; i++) {
@@ -171,11 +181,23 @@ function repainter(nodesJSON){
 	}
 
 	if(start[0] != null){
+		document.getElementById("gts").style = "color:green";
 		drawEndpoint(start);
+	} else{
+		document.getElementById("gts").style = "color:red";
 	}
 
 	if(finish[0] != null){
+		document.getElementById("gtd").style = "color:green";
 		drawEndpoint(finish);
+	}else{
+		document.getElementById("gtd").style = "color:red";
+	}
+	
+	if(start[0] != null && finish[0 != null]){
+		document.getElementById("enterButton").style = "color:green";
+	}else{
+		document.getElementById("enterButton").style = "color:red";
 	}
 };
 
