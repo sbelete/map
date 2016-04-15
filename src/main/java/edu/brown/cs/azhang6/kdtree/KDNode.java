@@ -55,7 +55,7 @@ public class KDNode<T extends Dimensional> implements KDVertex<T> {
    * @throws IllegalArgumentException if list of elements is empty
    */
   public KDNode(List<T> elements, int coordinate)
-      throws IllegalArgumentException {
+    throws IllegalArgumentException {
     this.coordinate = coordinate;
     List<T> elementsCopy = new ArrayList<>(elements);
 
@@ -98,12 +98,12 @@ public class KDNode<T extends Dimensional> implements KDVertex<T> {
       right = new KDNode<>(rightList, (coordinate + 1) % numDimensions);
     }
   }
-  
+
   /**
    * Should only be used by other classes in this package.
    */
   KDNode() {
-      
+
   }
 
   /**
@@ -115,8 +115,8 @@ public class KDNode<T extends Dimensional> implements KDVertex<T> {
    */
   protected double median(List<T> elements) {
     Collections.sort(elements, (T e1, T e2)
-        -> e1.getCoordinate(coordinate) < e2.getCoordinate(coordinate)
-            ? -1 : 1);
+      -> e1.getCoordinate(coordinate) < e2.getCoordinate(coordinate)
+        ? -1 : 1);
     return elements.get(elements.size() / 2).getCoordinate(coordinate);
   }
 
@@ -161,12 +161,12 @@ public class KDNode<T extends Dimensional> implements KDVertex<T> {
    */
   @Override
   public void nearestNeighbors(Dimensional d, int n, Predicate<T> ignore,
-      List<DimensionalDistance<T>> current)
-      throws IllegalArgumentException, NullPointerException {
+    List<DimensionalDistance<T>> current)
+    throws IllegalArgumentException, NullPointerException {
     // Check validity of arguments
     if (n < 0) {
       throw new IllegalArgumentException(
-          "number of nearest neighbors must be nonnegative");
+        "number of nearest neighbors must be nonnegative");
     }
     if (n == 0) {
       return;
@@ -182,21 +182,21 @@ public class KDNode<T extends Dimensional> implements KDVertex<T> {
 
     // If we've found fewer than n neighbors, definitely check the other branch
     if (current.size() < n) {
-        if (leftFirst) {
+      if (leftFirst) {
         right.nearestNeighbors(d, n, ignore, current);
       } else {
         left.nearestNeighbors(d, n, ignore, current);
       }
     } else {
-        // Otherwise, determine if we need to check the other branch
-        double farthest = current.get(current.size() - 1).getDistance();
-        if (d.distanceTo(d.withCoordinate(coordinate, split)) < farthest) {
-            if (leftFirst) {
-                right.nearestNeighbors(d, n, ignore, current);
-            } else {
-                left.nearestNeighbors(d, n, ignore, current);
-            }
+      // Otherwise, determine if we need to check the other branch
+      double farthest = current.get(current.size() - 1).getDistance();
+      if (d.distanceTo(d.withCoordinate(coordinate, split)) < farthest) {
+        if (leftFirst) {
+          right.nearestNeighbors(d, n, ignore, current);
+        } else {
+          left.nearestNeighbors(d, n, ignore, current);
         }
+      }
     }
   }
 
@@ -205,12 +205,12 @@ public class KDNode<T extends Dimensional> implements KDVertex<T> {
    */
   @Override
   public void withinRadius(Dimensional d, double r, Predicate<T> ignore,
-      List<DimensionalDistance<T>> current)
-      throws IllegalArgumentException, NullPointerException {
+    List<DimensionalDistance<T>> current)
+    throws IllegalArgumentException, NullPointerException {
     // Check validity of arguments
     if (r < 0) {
       throw new IllegalArgumentException(
-          "radius must be a non-negative decimal");
+        "radius must be a non-negative decimal");
     }
 
     // Which branch to check first
@@ -220,14 +220,14 @@ public class KDNode<T extends Dimensional> implements KDVertex<T> {
     } else {
       right.withinRadius(d, r, ignore, current);
     }
-    
+
     // Determine if we need to check the other branch
     if (d.distanceTo(d.withCoordinate(coordinate, split)) < r) {
-        if (leftFirst) {
-            right.withinRadius(d, r, ignore, current);
-        } else {
-            left.withinRadius(d, r, ignore, current);
-        }
+      if (leftFirst) {
+        right.withinRadius(d, r, ignore, current);
+      } else {
+        left.withinRadius(d, r, ignore, current);
+      }
     }
   }
 
@@ -265,6 +265,6 @@ public class KDNode<T extends Dimensional> implements KDVertex<T> {
   @Override
   public String toString() {
     return String.format("KDNode splitting coordinate %d at %f",
-        coordinate, split);
+      coordinate, split);
   }
 }

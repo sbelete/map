@@ -11,7 +11,7 @@ import java.util.Objects;
  * @param <T> a dimensional type
  */
 public class DimensionalDistance<T extends Dimensional>
-    implements Comparable<DimensionalDistance<T>> {
+  implements Comparable<DimensionalDistance<T>> {
 
   /**
    * A dimensional object.
@@ -105,7 +105,7 @@ public class DimensionalDistance<T extends Dimensional>
     }
     DimensionalDistance other = (DimensionalDistance) o;
     return this.dimensional.equals(other.dimensional)
-        && this.distance == other.distance;
+      && this.distance == other.distance;
   }
 
   /**

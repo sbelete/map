@@ -21,7 +21,7 @@ public class MutableDVertex<V, E> extends ImmutableDVertex<V, E> {
    * @param edges out-edges
    */
   public MutableDVertex(
-      Optional<V> value, List<? extends DEdge<V, E>> edges) {
+    Optional<V> value, List<? extends DEdge<V, E>> edges) {
     super(value, edges);
   }
 

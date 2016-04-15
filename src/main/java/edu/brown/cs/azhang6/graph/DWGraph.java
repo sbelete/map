@@ -59,7 +59,7 @@ public class DWGraph<V, E, T> {
      */
     public Builder<V, E, T> addVertex(T name, Optional<V> value) {
       graph.vertices.put(name, new MutableDWVertex<>(
-          value, Collections.emptyList()));
+        value, Collections.emptyList()));
       return this;
     }
 
@@ -85,7 +85,7 @@ public class DWGraph<V, E, T> {
     public Builder<V, E, T> addVertices(T... names) {
       for (T name : names) {
         graph.vertices.put(name, new MutableDWVertex<>(
-            Optional.empty(), Collections.emptyList()));
+          Optional.empty(), Collections.emptyList()));
       }
       return this;
     }
@@ -105,18 +105,18 @@ public class DWGraph<V, E, T> {
       // The names must be in the graph
       if (!graph.containsName(u)) {
         throw new IllegalArgumentException(String.format(
-            "no vertex with name: %s", u));
+          "no vertex with name: %s", u));
       }
       if (!graph.containsName(v)) {
         throw new IllegalArgumentException(String.format(
-            "no vertex with name: %s", v));
+          "no vertex with name: %s", v));
       }
 
       // Make the new edge and add it to the graph
       DWVertex<V, E> uVertex = graph.vertexByName(u);
       DWVertex<V, E> vVertex = graph.vertexByName(v);
       MutableDWEdge<V, E> newEdge = new MutableDWEdge<>(value,
-          uVertex, vVertex, weight);
+        uVertex, vVertex, weight);
       uVertex.addDWEdges(newEdge);
 
       // The string representation of the edge
@@ -189,6 +189,6 @@ public class DWGraph<V, E, T> {
   @Override
   public String toString() {
     return String.format("[graph with vertices %s and edges %s]",
-        vertices, edgeStrings);
+      vertices, edgeStrings);
   }
 }

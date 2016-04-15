@@ -163,14 +163,14 @@ public class KDLeafTest {
     assertTrue(caught1);
     // n argument is negative
     /*
-    boolean caught2 = false;
-    try {
-      tree.nearestNeighbors(new Point(0, 0, 0), 0, null);
-    } catch (IllegalArgumentException e) {
-      caught2 = true;
-    }
-    assertTrue(caught2);
-    */
+     boolean caught2 = false;
+     try {
+     tree.nearestNeighbors(new Point(0, 0, 0), 0, null);
+     } catch (IllegalArgumentException e) {
+     caught2 = true;
+     }
+     assertTrue(caught2);
+     */
     boolean caught3 = false;
     try {
       tree.nearestNeighbors(new Point(0, 0, 0), -1, null);
@@ -199,10 +199,10 @@ public class KDLeafTest {
      */
     // Request more neighbors than size of tree
     assertEquals(
-        tree.nearestNeighbors(new Point(0, 0, 0), 10, null).size(), 9);
+      tree.nearestNeighbors(new Point(0, 0, 0), 10, null).size(), 9);
     // All stars are eliminated by the predicate
     assertTrue(tree.nearestNeighbors(
-        new Point(0, 0, 0), 10, s -> true).isEmpty());
+      new Point(0, 0, 0), 10, s -> true).isEmpty());
 
     /*
      Cases that should throw exceptions for radius search
@@ -247,40 +247,40 @@ public class KDLeafTest {
     assertEquals(tree.withinRadius(new Point(1, 1, 1), 0, null).size(), 0);
     // All stars are within the radius
     assertEquals(tree.withinRadius(
-        new Point(0, 0, 0), 10000, null).size(), 9);
+      new Point(0, 0, 0), 10000, null).size(), 9);
     // All stars are eliminated by the predicate
     assertTrue(tree.withinRadius(
-        new Point(0, 0, 0), 10000, s -> true).isEmpty());
+      new Point(0, 0, 0), 10000, s -> true).isEmpty());
 
     // Create an oracle to run many more tests
     KDTreeOracle oracle = new KDTreeOracle<>(tree, stars);
     assertTrue(oracle.testNearestNeighbors());
     assertTrue(oracle.testRadiusSearch());
   }
-  
+
   /**
    * Uses oracle to test kd-tree with LatLng.
    */
   @Test
   public void testLatLng() {
-      try {
-          Database db = new Database("files/smallMaps.sqlite3");
-          NodeProxy.setDB(db);
-          Connection conn = db.getConnection();
-          try (PreparedStatement prep = conn.prepareStatement(
-              "SELECT id FROM node;")) {
-              List<Node> nodes = db.query(prep).stream().map(s -> Node.of(s))
-                  .collect(Collectors.toList());
-              KDLeaf<Node> tree = new KDLeaf<>(nodes);
-              KDTreeOracle<Node> oracle =
-                  new KDTreeOracle<>(tree, nodes, LatLng::new);
-              assertTrue(oracle.testNearestNeighbors());
-              assertTrue(oracle.testRadiusSearch());
-          } finally {
-              db.returnConnection(conn);
-          }
-      } catch (ClassNotFoundException | SQLException e) {
-          throw new RuntimeException(e);
+    try {
+      Database db = new Database("files/smallMaps.sqlite3");
+      NodeProxy.setDB(db);
+      Connection conn = db.getConnection();
+      try (PreparedStatement prep = conn.prepareStatement(
+        "SELECT id FROM node;")) {
+        List<Node> nodes = db.query(prep).stream().map(s -> Node.of(s))
+          .collect(Collectors.toList());
+        KDLeaf<Node> tree = new KDLeaf<>(nodes);
+        KDTreeOracle<Node> oracle
+          = new KDTreeOracle<>(tree, nodes, LatLng::new);
+        assertTrue(oracle.testNearestNeighbors());
+        assertTrue(oracle.testRadiusSearch());
+      } finally {
+        db.returnConnection(conn);
       }
+    } catch (ClassNotFoundException | SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

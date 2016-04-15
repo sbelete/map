@@ -118,14 +118,14 @@ public class KDNodeTest {
     assertTrue(caught1);
     // n argument is negative
     /*
-    boolean caught2 = false;
-    try {
-      tree.nearestNeighbors(new Point(0, 0, 0), 0, null);
-    } catch (IllegalArgumentException e) {
-      caught2 = true;
-    }
-    assertTrue(caught2);
-    */
+     boolean caught2 = false;
+     try {
+     tree.nearestNeighbors(new Point(0, 0, 0), 0, null);
+     } catch (IllegalArgumentException e) {
+     caught2 = true;
+     }
+     assertTrue(caught2);
+     */
     boolean caught3 = false;
     try {
       tree.nearestNeighbors(new Point(0, 0, 0), -1, null);
@@ -154,10 +154,10 @@ public class KDNodeTest {
      */
     // Request more neighbors than size of tree
     assertEquals(tree.nearestNeighbors(
-        new Point(0, 0, 0), 1000, null).size(), 999);
+      new Point(0, 0, 0), 1000, null).size(), 999);
     // All stars are eliminated by the predicate
     assertTrue(tree.nearestNeighbors(
-        new Point(0, 0, 0), 1000, s -> true).isEmpty());
+      new Point(0, 0, 0), 1000, s -> true).isEmpty());
 
     /*
      Cases that should throw exceptions for radius search
@@ -202,16 +202,16 @@ public class KDNodeTest {
     assertEquals(tree.withinRadius(new Point(1, 1, 1), 0, null).size(), 0);
     // All stars are within the radius
     assertEquals(tree.withinRadius(
-        new Point(0, 0, 0), Integer.MAX_VALUE, null).size(), 999);
+      new Point(0, 0, 0), Integer.MAX_VALUE, null).size(), 999);
     // All stars are eliminated by the predicate
     assertTrue(tree.withinRadius(
-        new Point(0, 0, 0), Integer.MAX_VALUE, s -> true).isEmpty());
+      new Point(0, 0, 0), Integer.MAX_VALUE, s -> true).isEmpty());
 
     // Create an oracle to run many more tests
     KDTreeOracle<Star> oracle = new KDTreeOracle<>(tree, stars);
     assertTrue(oracle.testNearestNeighbors());
     assertTrue(oracle.testRadiusSearch());
-    
+
     // Oracle tests for parallel kd-tree
     KDNodeParallel<Star> treeParallel = new KDNodeParallel<>(stars, 0, 3);
     KDTreeOracle<Star> oracleParallel = new KDTreeOracle<>(treeParallel, stars);

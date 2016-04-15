@@ -39,7 +39,7 @@ public class KDLeaf<T extends Dimensional> implements KDVertex<T> {
     int size = elements.size();
     if (size > MAX_COUNT) {
       throw new IllegalArgumentException(
-          String.format("Too many elements in a KDLeaf: %d", size));
+        String.format("Too many elements in a KDLeaf: %d", size));
     }
     this.elements = new ArrayList<>(elements);
   }
@@ -71,28 +71,28 @@ public class KDLeaf<T extends Dimensional> implements KDVertex<T> {
    */
   @Override
   public void nearestNeighbors(Dimensional d, int n, Predicate<T> ignore,
-      List<DimensionalDistance<T>> current) {
+    List<DimensionalDistance<T>> current) {
     // Check validity of arguments
     if (n < 0) {
       throw new IllegalArgumentException(
-          "number of nearest neighbors must be nonnegative");
+        "number of nearest neighbors must be nonnegative");
     }
     if (n == 0) {
       return;
     }
 
-      // For each element in this leaf that shouldn't be ignored:
-      for (T element : elements) {
-        if (ignore == null || !ignore.test(element)) {
-          // Calculate distance to the given dimensional
-          new DimensionalDistance<>(element, element.distanceTo(d))
-              .insertInto(current);
-        }
+    // For each element in this leaf that shouldn't be ignored:
+    for (T element : elements) {
+      if (ignore == null || !ignore.test(element)) {
+        // Calculate distance to the given dimensional
+        new DimensionalDistance<>(element, element.distanceTo(d))
+          .insertInto(current);
       }
-      // Remove elements until there are at most n elements
-      while (current.size() > n) {
-        current.remove(n);
-      }
+    }
+    // Remove elements until there are at most n elements
+    while (current.size() > n) {
+      current.remove(n);
+    }
   }
 
   /**
@@ -100,24 +100,24 @@ public class KDLeaf<T extends Dimensional> implements KDVertex<T> {
    */
   @Override
   public void withinRadius(Dimensional d, double r, Predicate<T> ignore,
-      List<DimensionalDistance<T>> current) {
+    List<DimensionalDistance<T>> current) {
     // Check validity of arguments
     if (r < 0) {
       throw new IllegalArgumentException(
-          "radius must be a non-negative decimal");
+        "radius must be a non-negative decimal");
     }
 
-      // For each element in this leaf that shouldn't be ignored:
-      for (T element : elements) {
-        if (ignore == null || !ignore.test(element)) {
-          // Check if the element is within the given distance
-          double distance = element.distanceTo(d);
-          if (distance <= r) {
-            current.add(
-                new DimensionalDistance<>(element, distance));
-          }
+    // For each element in this leaf that shouldn't be ignored:
+    for (T element : elements) {
+      if (ignore == null || !ignore.test(element)) {
+        // Check if the element is within the given distance
+        double distance = element.distanceTo(d);
+        if (distance <= r) {
+          current.add(
+            new DimensionalDistance<>(element, distance));
         }
       }
+    }
   }
 
   /**

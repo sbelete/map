@@ -67,17 +67,17 @@ public class CSVReader {
     this.file = file;
     if (delimiter == null) {
       throw new NullPointerException(
-          "Creating CSVReader with null delimiter");
+        "Creating CSVReader with null delimiter");
     }
     this.delimiter = delimiter;
 
     // Initialize the BufferedReader
     try {
       reader = new BufferedReader(
-          new InputStreamReader(new FileInputStream(file), "UTF-8"));
+        new InputStreamReader(new FileInputStream(file), "UTF-8"));
     } catch (IOException e) {
       throw new IOException(
-          String.format("Could not read file %s", file));
+        String.format("Could not read file %s", file));
     }
 
     // Read the header, throwing an exception if file is empty
@@ -85,8 +85,8 @@ public class CSVReader {
     lineNum++;
     if (header == null) {
       throw new ParseException(String.format(
-          "Error parsing file %s line %d: empty file", file, lineNum),
-          lineNum);
+        "Error parsing file %s line %d: empty file", file, lineNum),
+        lineNum);
     }
 
     // Split the header into pieces and initialize the tags map
@@ -96,8 +96,8 @@ public class CSVReader {
       String tag = headerPieces[i];
       if (tags.keySet().contains(tag)) {
         throw new ParseException(String.format(
-            "Error parsing file %s line %d: duplicate tag %s",
-            file, lineNum, tag), lineNum);
+          "Error parsing file %s line %d: duplicate tag %s",
+          file, lineNum, tag), lineNum);
       }
       tags.put(tag, i);
     }
@@ -129,7 +129,7 @@ public class CSVReader {
       return true;
     } catch (IOException e) {
       throw new IOException(String.format(
-          "Could not read next line from file %s", file));
+        "Could not read next line from file %s", file));
     }
   }
 
@@ -153,11 +153,11 @@ public class CSVReader {
       return line[tags.get(tag)];
     } catch (ArrayIndexOutOfBoundsException e) {
       throw new ParseException(String.format(
-          "Error parsing file %s line %d: incorrectly formatted",
-          file, lineNum), lineNum);
+        "Error parsing file %s line %d: incorrectly formatted",
+        file, lineNum), lineNum);
     } catch (NullPointerException e) {
       throw new IllegalArgumentException(
-          String.format("Invalid tag: %s", tag));
+        String.format("Invalid tag: %s", tag));
     }
   }
 
@@ -171,7 +171,7 @@ public class CSVReader {
       reader.close();
     } catch (IOException e) {
       throw new IOException(
-          String.format("Could not close file %s", file));
+        String.format("Could not close file %s", file));
     }
   }
 
@@ -181,7 +181,7 @@ public class CSVReader {
   @Override
   public String toString() {
     return String.format("CSVReader reading file %s using delimiter %s",
-        file, delimiter);
+      file, delimiter);
   }
 
   /**

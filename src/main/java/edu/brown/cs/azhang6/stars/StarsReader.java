@@ -10,8 +10,7 @@ import java.util.List;
 
 /**
  * Reads a CSV-formatted stars file. A properly formatted stars file must have a
- * header on the first line and five fields on each line:
- * {@value StarsReader#ID}, {@value StarsReader#NAME}, {@value StarsReader#X},
+ * header on the first line and five fields on each line: null {@value StarsReader#ID}, {@value StarsReader#NAME}, {@value StarsReader#X},
  * {@value StarsReader#Y}, and {@value StarsReader#Z} (without the quotes).
  *
  * @author aaronzhang
@@ -88,11 +87,11 @@ public class StarsReader {
       ArrayList<Star> stars = new ArrayList<>();
       while (reader.nextLine()) {
         Star star = new Star(
-            Integer.parseInt(reader.get(ID)),
-            reader.get(NAME),
-            Double.parseDouble(reader.get(X)),
-            Double.parseDouble(reader.get(Y)),
-            Double.parseDouble(reader.get(Z)));
+          Integer.parseInt(reader.get(ID)),
+          reader.get(NAME),
+          Double.parseDouble(reader.get(X)),
+          Double.parseDouble(reader.get(Y)),
+          Double.parseDouble(reader.get(Z)));
         // Add star to map of stars by name if name is not empty
         if (!star.getName().equals("")) {
           starsByName.put(star.getName(), star);
@@ -102,13 +101,13 @@ public class StarsReader {
       return stars;
     } catch (NumberFormatException e) {
       throw new ParseException(String.format(
-          "Error reading file %s line %d: invalid number format",
-          reader.getFile(), reader.getLineNum()),
-          reader.getLineNum());
+        "Error reading file %s line %d: invalid number format",
+        reader.getFile(), reader.getLineNum()),
+        reader.getLineNum());
     } catch (IllegalArgumentException e) {
       throw new ParseException(String.format(
-          "File %s does not contain correct tags", reader.getFile()),
-          0);
+        "File %s does not contain correct tags", reader.getFile()),
+        0);
     } finally {
       reader.close();
     }
@@ -129,7 +128,7 @@ public class StarsReader {
     // Check validity of call and arguments
     if (!read) {
       throw new IllegalStateException(String.format(
-          "Stars file %s has not been read yet", reader.getFile()));
+        "Stars file %s has not been read yet", reader.getFile()));
     }
     if (name == null) {
       throw new NullPointerException("Calling starWithName() on null");
@@ -137,8 +136,8 @@ public class StarsReader {
     Star star = starsByName.get(name);
     if (star == null) {
       throw new IllegalArgumentException(String.format(
-          "Cannot find star with name %s in file %s",
-          name, reader.getFile()));
+        "Cannot find star with name %s in file %s",
+        name, reader.getFile()));
     }
     return star;
   }
@@ -149,6 +148,6 @@ public class StarsReader {
   @Override
   public String toString() {
     return String.format("StarsReader reading file %s using delimiter %s",
-        reader.getFile(), reader.getDelimiter());
+      reader.getFile(), reader.getDelimiter());
   }
 }

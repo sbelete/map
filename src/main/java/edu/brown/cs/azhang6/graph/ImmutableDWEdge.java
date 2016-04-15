@@ -10,7 +10,7 @@ import java.util.Optional;
  * @param <E> type of edge value
  */
 public class ImmutableDWEdge<V, E>
-    extends ImmutableDEdge<V, E> implements DWEdge<V, E> {
+  extends ImmutableDEdge<V, E> implements DWEdge<V, E> {
 
   /**
    * Weight.
@@ -27,7 +27,7 @@ public class ImmutableDWEdge<V, E>
    * @param weight weight
    */
   public ImmutableDWEdge(Optional<E> value,
-      DWVertex<V, E> tail, DWVertex<V, E> head, double weight) {
+    DWVertex<V, E> tail, DWVertex<V, E> head, double weight) {
     super(value, tail, head);
     this.weight = weight;
   }
@@ -46,6 +46,6 @@ public class ImmutableDWEdge<V, E>
   @Override
   public String toString() {
     return String.format("[value=%s, weight=%f: %s -> %s]",
-        value, weight, tail, head);
+      value, weight, tail, head);
   }
 }

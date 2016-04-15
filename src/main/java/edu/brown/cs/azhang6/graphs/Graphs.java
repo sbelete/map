@@ -39,7 +39,7 @@ public final class Graphs {
    * @return minimum-weight walk from start to end, or null if no such walk
    */
   public static <V, E> OrderedPair<Walk<V, E>, Double> dijkstra(
-      WVertex<V, E> root, Predicate<WVertex<V, E>> stop) {
+    WVertex<V, E> root, Predicate<WVertex<V, E>> stop) {
     // First, we check if the root itself satisfies the predicate
     if (stop.test(root)) {
       return new OrderedPair<>(new Walk.Builder<>(root).build(), 0D);
@@ -48,14 +48,14 @@ public final class Graphs {
     // Maps visited vertices to weight and last edge of minimum path
     // Start by putting the root in the visited set
     HashMap<WVertex<V, E>, OrderedPair<Double, DijkstraEdge<V, E>>> visited
-        = new HashMap<>();
+      = new HashMap<>();
     visited.put(root, new OrderedPair(0, null));
     // Heap of outgoing edges from vertices in the visited set
     // Start by putting the root's edges in the heap
     PriorityQueue<DijkstraEdge<V, E>> edges = new PriorityQueue<>();
     for (WEdge<V, E> we : root.getWEdges()) {
       edges.add(new DijkstraEdge<>(
-          we, we.getWEndpoints().not(root), we.getWeight()));
+        we, we.getWEndpoints().not(root), we.getWeight()));
     }
 
     // Iterate until we've found an appropriate vertex or no more edges
@@ -90,8 +90,8 @@ public final class Graphs {
       // And add the outgoing edges from the new vertex to the heap
       for (WEdge<V, E> newEdge : dest.getWEdges()) {
         edges.add(new DijkstraEdge(
-            newEdge, newEdge.getWEndpoints().not(dest),
-            newWeight + newEdge.getWeight()));
+          newEdge, newEdge.getWEndpoints().not(dest),
+          newWeight + newEdge.getWeight()));
       }
     }
 
@@ -114,7 +114,7 @@ public final class Graphs {
    * @param <E> type of edge value
    */
   private static class DijkstraEdge<V, E> extends ImmutableWEdge<V, E>
-      implements Comparable<DijkstraEdge<V, E>> {
+    implements Comparable<DijkstraEdge<V, E>> {
 
     /**
      * Tail vertex.
@@ -200,20 +200,20 @@ public final class Graphs {
    * @return minimum-weight walk from start to end, or null if no such walk
    */
   public static <V, E, T extends WVertex<V, E>> OrderedPair<Walk<V, E>, Double>
-      dijkstraAStar(T root, Predicate<T> stop,
-          ToDoubleFunction<? super T> heuristic) {
+    dijkstraAStar(T root, Predicate<T> stop,
+      ToDoubleFunction<? super T> heuristic) {
     // Same idea as dijkstra, but include the heuristic
     if (stop.test(root)) {
       return new OrderedPair<>(new Walk.Builder<>(root).build(), 0D);
     }
     HashMap<T, OrderedPair<Double, DijkstraEdgeAStar<V, E, T>>> visited
-        = new HashMap<>();
+      = new HashMap<>();
     visited.put(root, new OrderedPair(0, null));
     // Here, the edges are sorted by total weight including heuristic
     PriorityQueue<DijkstraEdgeAStar<V, E, T>> edges = new PriorityQueue<>();
     for (WEdge<V, E> we : root.getWEdges()) {
       edges.add(new DijkstraEdgeAStar<>(
-          we, (T) we.getWEndpoints().not(root), we.getWeight(), heuristic));
+        we, (T) we.getWEndpoints().not(root), we.getWeight(), heuristic));
     }
 
     // Again, keep checking the outgoing edge of least weight
@@ -235,16 +235,16 @@ public final class Graphs {
       visited.put(dest, new OrderedPair(newWeight, e));
       for (WEdge<V, E> newEdge : dest.getWEdges()) {
         edges.add(new DijkstraEdgeAStar(
-            newEdge, newEdge.getWEndpoints().not(dest),
-            newWeight + newEdge.getWeight(), heuristic));
+          newEdge, newEdge.getWEndpoints().not(dest),
+          newWeight + newEdge.getWeight(), heuristic));
       }
     }
 
     // Return null if the start and end are disconnected
     return null;
   }
-      
-      /**
+
+  /**
    * Same as the normal A* version, but fails if the next vertex to check is too
    * far or if too many vertices have been searched.
    *
@@ -259,14 +259,14 @@ public final class Graphs {
    * @return minimum-weight walk from start to end, or null if no such walk
    */
   public static <V, E, T extends WVertex<V, E>> OrderedPair<Walk<V, E>, Double>
-      dijkstraAStarFail(T root, Predicate<T> stop,
-          ToDoubleFunction<? super T> heuristic, double failLimit, int maxVertices) {
+    dijkstraAStarFail(T root, Predicate<T> stop,
+      ToDoubleFunction<? super T> heuristic, double failLimit, int maxVertices) {
     // Same idea as dijkstra, but include the heuristic
     if (stop.test(root)) {
       return new OrderedPair<>(new Walk.Builder<>(root).build(), 0D);
     }
     HashMap<T, OrderedPair<Double, DijkstraEdgeAStar<V, E, T>>> visited
-        = new HashMap<>();
+      = new HashMap<>();
     visited.put(root, new OrderedPair(0, null));
     // Get the fail limit
     double fail = failLimit * heuristic.applyAsDouble(root);
@@ -274,7 +274,7 @@ public final class Graphs {
     PriorityQueue<DijkstraEdgeAStar<V, E, T>> edges = new PriorityQueue<>();
     for (WEdge<V, E> we : root.getWEdges()) {
       edges.add(new DijkstraEdgeAStar<>(
-          we, (T) we.getWEndpoints().not(root), we.getWeight(), heuristic));
+        we, (T) we.getWEndpoints().not(root), we.getWeight(), heuristic));
     }
 
     // Again, keep checking the outgoing edge of least weight
@@ -282,7 +282,7 @@ public final class Graphs {
       DijkstraEdgeAStar<V, E, T> e = edges.poll();
       // Check if we should fail
       if (e.getHeuristicWeight() > fail || visited.size() > maxVertices) {
-          return null;
+        return null;
       }
       T dest = e.getHead();
       if (visited.keySet().contains(dest)) {
@@ -300,8 +300,8 @@ public final class Graphs {
       visited.put(dest, new OrderedPair(newWeight, e));
       for (WEdge<V, E> newEdge : dest.getWEdges()) {
         edges.add(new DijkstraEdgeAStar(
-            newEdge, newEdge.getWEndpoints().not(dest),
-            newWeight + newEdge.getWeight(), heuristic));
+          newEdge, newEdge.getWEndpoints().not(dest),
+          newWeight + newEdge.getWeight(), heuristic));
       }
     }
 
@@ -316,8 +316,8 @@ public final class Graphs {
    * @param <E> type of edge value
    */
   private static class DijkstraEdgeAStar<V, E, T extends WVertex<V, E>>
-      extends ImmutableWEdge<V, E>
-      implements Comparable<DijkstraEdgeAStar<V, E, T>> {
+    extends ImmutableWEdge<V, E>
+    implements Comparable<DijkstraEdgeAStar<V, E, T>> {
 
     /**
      * Tail vertex.
@@ -349,7 +349,7 @@ public final class Graphs {
      * @param heuristicWeight total weight including heuristic
      */
     DijkstraEdgeAStar(WEdge<V, E> we, T head, double totalWeight,
-        ToDoubleFunction<? super T> heuristic) {
+      ToDoubleFunction<? super T> heuristic) {
       super(we.getValue(), we.getWEndpoints(), we.getWeight());
       this.tail = (T) getWEndpoints().not(head);
       this.head = head;

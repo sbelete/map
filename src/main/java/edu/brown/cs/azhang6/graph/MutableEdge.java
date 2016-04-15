@@ -20,7 +20,7 @@ public class MutableEdge<V, E> extends ImmutableEdge<V, E> {
    * @param endpoints endpoints
    */
   public MutableEdge(Optional<E> value,
-      UnorderedPair<? extends Vertex<V, E>> endpoints) {
+    UnorderedPair<? extends Vertex<V, E>> endpoints) {
     super(value, endpoints);
   }
 

@@ -51,8 +51,8 @@ public interface KDVertex<T extends Dimensional> {
    * @throws NullPointerException if {@code d} or {@code current} are null
    */
   void nearestNeighbors(Dimensional d, int n, Predicate<T> ignore,
-      List<DimensionalDistance<T>> current)
-      throws IllegalArgumentException, NullPointerException;
+    List<DimensionalDistance<T>> current)
+    throws IllegalArgumentException, NullPointerException;
 
   /**
    * Finds up to {@code n} nearest neighbors of the given {@link Dimensional}.
@@ -71,8 +71,8 @@ public interface KDVertex<T extends Dimensional> {
    * @throws NullPointerException if {@code d} is null
    */
   default List<DimensionalDistance<T>> nearestNeighbors(Dimensional d, int n,
-      Predicate<T> ignore)
-      throws IllegalArgumentException, NullPointerException {
+    Predicate<T> ignore)
+    throws IllegalArgumentException, NullPointerException {
     List<DimensionalDistance<T>> nn = new ArrayList<>();
     nearestNeighbors(d, n, ignore, nn);
     return nn;
@@ -102,8 +102,8 @@ public interface KDVertex<T extends Dimensional> {
    * @throws NullPointerException if {@code d} or {@code current} is null
    */
   void withinRadius(Dimensional d, double r, Predicate<T> ignore,
-      List<DimensionalDistance<T>> current)
-      throws IllegalArgumentException, NullPointerException;
+    List<DimensionalDistance<T>> current)
+    throws IllegalArgumentException, NullPointerException;
 
   /**
    * Finds all elements within distance {@code r} of {@link Dimensional}
@@ -123,8 +123,8 @@ public interface KDVertex<T extends Dimensional> {
    * @throws NullPointerException if {@code d} is null
    */
   default List<DimensionalDistance<T>> withinRadius(Dimensional d, double r,
-      Predicate<T> ignore)
-      throws IllegalArgumentException, NullPointerException {
+    Predicate<T> ignore)
+    throws IllegalArgumentException, NullPointerException {
     List<DimensionalDistance<T>> wr = new ArrayList<>();
     withinRadius(d, r, ignore, wr);
     Collections.sort(wr);

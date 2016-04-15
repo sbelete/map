@@ -21,7 +21,7 @@ public class MutableWEdge<V, E> extends ImmutableWEdge<V, E> {
    * @param weight weight
    */
   public MutableWEdge(Optional<E> value,
-      UnorderedPair<? extends Vertex<V, E>> endpoints, double weight) {
+    UnorderedPair<? extends Vertex<V, E>> endpoints, double weight) {
     super(value, endpoints, weight);
   }
 

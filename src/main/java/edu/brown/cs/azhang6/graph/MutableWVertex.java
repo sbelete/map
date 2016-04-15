@@ -22,7 +22,7 @@ public class MutableWVertex<V, E> extends ImmutableWVertex<V, E> {
    * @param edges incident edges
    */
   public MutableWVertex(
-      Optional<V> value, List<? extends Edge<V, E>> edges) {
+    Optional<V> value, List<? extends Edge<V, E>> edges) {
     super(value, edges);
   }
 

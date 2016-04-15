@@ -19,7 +19,7 @@ public class Point implements Dimensional {
    * String representation of this point.
    */
   private final String strRep;
-  
+
   /**
    * Constructs a new {@code Point} with the given coordinates.
    *
@@ -29,8 +29,8 @@ public class Point implements Dimensional {
     this.coordinates = coordinates;
 
     // Save string representation of this object
-    StringBuilder strRepBuilder =
-        new StringBuilder("Point with coordinates (");
+    StringBuilder strRepBuilder
+      = new StringBuilder("Point with coordinates (");
     for (double coordinate : coordinates) {
       strRepBuilder.append(coordinate).append(",");
     }
@@ -53,7 +53,7 @@ public class Point implements Dimensional {
       return coordinates[coordinate];
     } catch (ArrayIndexOutOfBoundsException e) {
       throw new IllegalArgumentException(
-          String.format("Coordinate out of range: %d", coordinate));
+        String.format("Coordinate out of range: %d", coordinate));
     }
   }
 
@@ -83,7 +83,7 @@ public class Point implements Dimensional {
     }
     if (this.numDimensions() != other.numDimensions()) {
       throw new IllegalArgumentException(String.format(
-          "Dimension mismatch between %s and %s", this, other));
+        "Dimension mismatch between %s and %s", this, other));
     }
 
     double squaredSum = 0;
@@ -135,10 +135,10 @@ public class Point implements Dimensional {
     return Arrays.hashCode(coordinates);
   }
 
-    @Override
-    public Dimensional withCoordinate(int coordinate, double value) {
-        double[] coordinatesCopy = Arrays.copyOf(coordinates, coordinates.length);
-        coordinatesCopy[coordinate] = value;
-        return new Point(coordinatesCopy);
-    }
+  @Override
+  public Dimensional withCoordinate(int coordinate, double value) {
+    double[] coordinatesCopy = Arrays.copyOf(coordinates, coordinates.length);
+    coordinatesCopy[coordinate] = value;
+    return new Point(coordinatesCopy);
+  }
 }

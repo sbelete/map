@@ -49,7 +49,7 @@ public class UnorderedPair<T> extends Pair<T, T> {
     }
     UnorderedPair other = (UnorderedPair) o;
     return this.s().equals(other.s()) && this.t().equals(other.t())
-        || this.s().equals(other.t()) && this.t().equals(other.s());
+      || this.s().equals(other.t()) && this.t().equals(other.s());
   }
 
   /**

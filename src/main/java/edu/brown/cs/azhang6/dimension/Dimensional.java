@@ -31,10 +31,10 @@ public interface Dimensional {
    * @throws IllegalArgumentException if distance to other object not defined
    */
   double distanceTo(Dimensional other);
-  
+
   /**
    * Returns a new dimensional object with the specified coordinate set.
-   * 
+   *
    * @param coordinate coordinate
    * @param value new value of coordinate
    * @return new dimensional object

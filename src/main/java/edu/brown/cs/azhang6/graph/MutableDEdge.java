@@ -19,7 +19,7 @@ public class MutableDEdge<V, E> extends ImmutableDEdge<V, E> {
    * @param head head
    */
   public MutableDEdge(
-      Optional<E> value, DVertex<V, E> tail, DVertex<V, E> head) {
+    Optional<E> value, DVertex<V, E> tail, DVertex<V, E> head) {
     super(value, tail, head);
   }
 

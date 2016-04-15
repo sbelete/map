@@ -12,7 +12,7 @@ import java.util.Optional;
  * @param <E> type of edge value
  */
 public class ImmutableDWVertex<V, E>
-    extends ImmutableVertex<V, E> implements DWVertex<V, E> {
+  extends ImmutableVertex<V, E> implements DWVertex<V, E> {
 
   /**
    * New immutable weighted digraph vertex with optional value and list of
@@ -22,7 +22,7 @@ public class ImmutableDWVertex<V, E>
    * @param edges out-edges
    */
   public ImmutableDWVertex(
-      Optional<V> value, List<? extends DWEdge<V, E>> edges) {
+    Optional<V> value, List<? extends DWEdge<V, E>> edges) {
     super(value, edges);
   }
 
@@ -32,6 +32,6 @@ public class ImmutableDWVertex<V, E>
   @Override
   public List<? extends DWEdge<V, E>> getDWEdges() {
     return Collections.unmodifiableList(
-        (List<? extends DWEdge<V, E>>) edges);
+      (List<? extends DWEdge<V, E>>) edges);
   }
 }

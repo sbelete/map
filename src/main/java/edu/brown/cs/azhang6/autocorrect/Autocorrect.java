@@ -11,198 +11,194 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 public class Autocorrect extends Trie {
-	private static int led = 3; // Default LED
 
-	/**
-	 * Constructor for Autocorrect uses Trie constructor
-	 * 
-	 * @param words
-	 *            - a collection of words to be saved
-	 */
-	public Autocorrect(Collection<String> words) {
-		super(words);
-	}
+  private static int led = 3; // Default LED
 
-	/**
-	 * @exception IllegalArgumentException
-	 *                - led > 0
-	 * @param led
-	 *            - is the distance we are willing to search
-	 */
-	public void setLed(int led) {
-		if (led < 0) {
-			throw new IllegalArgumentException("Can't set LED to < 0");
-		}
+  /**
+   * Constructor for Autocorrect uses Trie constructor.
+   *
+   * @param words - a collection of words to be saved
+   */
+  public Autocorrect(Collection<String> words) {
+    super(words);
+  }
 
-		Autocorrect.led = led;
-	}
+  /**
+   * @exception IllegalArgumentException if led negative
+   * @param led - is the distance we are willing to search
+   */
+  public void setLed(int led) {
+    if (led < 0) {
+      throw new IllegalArgumentException("Can't set LED to < 0");
+    }
 
-	/**
-	 * Makes led accessible
-	 * 
-	 * @return - returns the led
-	 */
-	public int getLed() {
-		return led;
-	}
+    Autocorrect.led = led;
+  }
 
-	/**
-	 * Creates a list of words in within set led
-	 * 
-	 * @param word
-	 *            - word to be compared to
-	 * @return - a list of words within set led to word
-	 */
-	public List<String> suggestLed(String word) {
-		List<String> suggestions = new ArrayList<>();
+  /**
+   * Makes led accessible
+   *
+   * @return - returns the led
+   */
+  public int getLed() {
+    return led;
+  }
 
-		// Returns only exact word if led is zero
-		if (led == 0) {
-			if (contains(word)) {
-				suggestions.add(word);
-			}
+  /**
+   * Creates a list of words in within set led
+   *
+   * @param word - word to be compared to
+   * @return - a list of words within set led to word
+   */
+  public List<String> suggestLed(String word) {
+    List<String> suggestions = new ArrayList<>();
 
-			return suggestions;
-		}
+    // Returns only exact word if led is zero
+    if (led == 0) {
+      if (contains(word)) {
+        suggestions.add(word);
+      }
 
-		char[] letters = (" " + word).toCharArray();
-		int[][] ledValue = new int[letters.length + led][letters.length];
+      return suggestions;
+    }
 
-		for (int y = 1; y < letters.length; y++)
-			ledValue[0][y] = y;
+    char[] letters = (" " + word).toCharArray();
+    int[][] ledValue = new int[letters.length + led][letters.length];
 
-		StringBuilder sb = new StringBuilder(" ");
+    for (int y = 1; y < letters.length; y++) {
+      ledValue[0][y] = y;
+    }
 
-		getBase().entrySet().forEach(i -> {
-			sb.append(i.getKey());
+    StringBuilder sb = new StringBuilder(" ");
 
-			// calls a helper
-			suggestLedHelper(i.getValue(), letters, ledValue, sb, suggestions);
+    getBase().entrySet().forEach(i -> {
+      sb.append(i.getKey());
 
-			sb.deleteCharAt(sb.length() - 1); // removes the last character
-		});
+      // calls a helper
+      suggestLedHelper(i.getValue(), letters, ledValue, sb, suggestions);
 
-		return suggestions;
-	}
+      sb.deleteCharAt(sb.length() - 1); // removes the last character
+    });
 
-	// Helper function for suggestLedHelper
-	private static void suggestLedHelper(TrieNode node, char[] letters, int[][] ledValue, StringBuilder sb,
-			List<String> suggestions) {
-		int sL = sb.length() - 1;
-		// base for the recursive loop
-		if (sL + 1 > ledValue.length) {
-			return;
-		}
+    return suggestions;
+  }
 
-		int length = letters.length;
+  // Helper function for suggestLedHelper
+  private static void suggestLedHelper(TrieNode node, char[] letters, int[][] ledValue, StringBuilder sb,
+    List<String> suggestions) {
+    int sL = sb.length() - 1;
+    // base for the recursive loop
+    if (sL + 1 > ledValue.length) {
+      return;
+    }
 
-		ledValue[sL][0] = sL;
-		int min = sL;
+    int length = letters.length;
 
-		for (int k = 1; k < length; k++) {
-			ledValue[sL][k] = ledValue[sL - 1][k - 1];
+    ledValue[sL][0] = sL;
+    int min = sL;
 
-			if (sb.charAt(sL) != letters[k]) {
-				ledValue[sL][k] = Math.min(Math.min(
-						ledValue[sL][k], ledValue[sL - 1][k]),
-						ledValue[sL][k - 1]) + 1;
-			}
+    for (int k = 1; k < length; k++) {
+      ledValue[sL][k] = ledValue[sL - 1][k - 1];
 
-			// setting the new min
-			if (ledValue[sL][k] < min) {
-				min = ledValue[sL][k];
-			}
-		}
+      if (sb.charAt(sL) != letters[k]) {
+        ledValue[sL][k] = Math.min(Math.min(
+          ledValue[sL][k], ledValue[sL - 1][k]),
+          ledValue[sL][k - 1]) + 1;
+      }
 
-		// If word is in the led then add it to suggestions
-		if (ledValue[sL][length - 1] <= led && node.validWord()) {
-			suggestions.add(sb.toString().substring(1));
-		}
+      // setting the new min
+      if (ledValue[sL][k] < min) {
+        min = ledValue[sL][k];
+      }
+    }
 
-		// Check to see if we are at max distance allowed if not go further
-		if (min <= led) {
-			for (Entry<Character, TrieNode> e : node.entrySet()) {
-				sb.append(e.getKey());
+    // If word is in the led then add it to suggestions
+    if (ledValue[sL][length - 1] <= led && node.validWord()) {
+      suggestions.add(sb.toString().substring(1));
+    }
 
-				// Recursive call
-				suggestLedHelper(e.getValue(), letters, ledValue, sb, suggestions);
+    // Check to see if we are at max distance allowed if not go further
+    if (min <= led) {
+      for (Entry<Character, TrieNode> e : node.entrySet()) {
+        sb.append(e.getKey());
 
-				sb.deleteCharAt(sb.length() - 1);
-			}
-		}
-	}
+        // Recursive call
+        suggestLedHelper(e.getValue(), letters, ledValue, sb, suggestions);
 
-	/**
-	 * Finds if a word could use a space
-	 * 
-	 * @param s
-	 *            - a word that could have a space
-	 * @return - a list of two words
-	 */
-	public List<String> whitespace(String s) {
-		List<String> retSug = new ArrayList<String>();
+        sb.deleteCharAt(sb.length() - 1);
+      }
+    }
+  }
 
-		// Checks all possible subsets of words
-		for (int i = 0; i < s.length(); i++) {
-			String w1 = s.substring(0, i);
-			String w2 = s.substring(i);
+  /**
+   * Finds if a word could use a space
+   *
+   * @param s - a word that could have a space
+   * @return - a list of two words
+   */
+  public List<String> whitespace(String s) {
+    List<String> retSug = new ArrayList<String>();
 
-			if (contains(w1) && contains(w2)) {
-				retSug.add(w1 + " " + w2);
-			}
-		}
+    // Checks all possible subsets of words
+    for (int i = 0; i < s.length(); i++) {
+      String w1 = s.substring(0, i);
+      String w2 = s.substring(i);
 
-		return retSug;
-	}
+      if (contains(w1) && contains(w2)) {
+        retSug.add(w1 + " " + w2);
+      }
+    }
 
-	/**
-	 * Creates a list of suggested words through auto complete
-	 * 
-	 * @param s
-	 *            - string that is prefix of the word
-	 * @return - a list of strings that start with the string given
-	 */
-	public List<String> autocomplete(String s) {
-		List<String> suggestions = new ArrayList<String>();
-		TrieNode node = getNode(s); // finds string in node
+    return retSug;
+  }
 
-		if (node == null) {
-			return suggestions;
-		}
+  /**
+   * Creates a list of suggested words through auto complete
+   *
+   * @param s - string that is prefix of the word
+   * @return - a list of strings that start with the string given
+   */
+  public List<String> autocomplete(String s) {
+    List<String> suggestions = new ArrayList<String>();
+    TrieNode node = getNode(s); // finds string in node
 
-		Iterator<String> iter = new TrieIterator(node, s);
-		while (iter.hasNext()) {
-			suggestions.add(iter.next()); // add following nodes from current
-		}
+    if (node == null) {
+      return suggestions;
+    }
 
-		return suggestions;
-	}
+    Iterator<String> iter = new TrieIterator(node, s);
+    while (iter.hasNext()) {
+      suggestions.add(iter.next()); // add following nodes from current
+    }
 
-	public boolean useWhitespace = false;
-	public boolean useAutocomplete = false;
+    return suggestions;
+  }
 
-	public List<String> suggest(String word) {
-		// Comparator for how to sort suggestions
-		Comparator<? super String> comp = null;
-		word = word.trim();
+  public boolean useWhitespace = false;
+  public boolean useAutocomplete = false;
 
-		Set<String> suggestions = new HashSet<String>();
-		if (contains(word)) {
-			suggestions.add(word);
-		}
+  public List<String> suggest(String word) {
+    // Comparator for how to sort suggestions
+    Comparator<? super String> comp = null;
+    word = word.trim();
 
-			suggestions.addAll(autocomplete(word));
-			suggestions.addAll(suggestLed(word));
-			suggestions.addAll(whitespace(word));
+    Set<String> suggestions = new HashSet<String>();
+    if (contains(word)) {
+      suggestions.add(word);
+    }
 
-		comp = new Led(word);
+    suggestions.addAll(autocomplete(word));
+    suggestions.addAll(suggestLed(word));
+    suggestions.addAll(whitespace(word));
 
-		List<String> retSuggestions = new ArrayList<String>(suggestions);
+    comp = new Led(word);
 
-		if (comp != null) {
-			Collections.sort(retSuggestions, comp);
-		}
+    List<String> retSuggestions = new ArrayList<String>(suggestions);
 
-		return retSuggestions;
-	}
+    if (comp != null) {
+      Collections.sort(retSuggestions, comp);
+    }
+
+    return retSuggestions;
+  }
 }

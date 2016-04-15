@@ -12,7 +12,7 @@ import java.util.Optional;
  * @param <E> type of edge value
  */
 public class ImmutableWVertex<V, E>
-    extends ImmutableVertex<V, E> implements WVertex<V, E> {
+  extends ImmutableVertex<V, E> implements WVertex<V, E> {
 
   /**
    * New immutable weighted graph vertex with optional value and list of
@@ -22,7 +22,7 @@ public class ImmutableWVertex<V, E>
    * @param edges incident edges
    */
   public ImmutableWVertex(
-      Optional<V> value, List<? extends Edge<V, E>> edges) {
+    Optional<V> value, List<? extends Edge<V, E>> edges) {
     super(value, edges);
   }
 
@@ -32,6 +32,6 @@ public class ImmutableWVertex<V, E>
   @Override
   public List<? extends WEdge<V, E>> getWEdges() {
     return Collections.unmodifiableList(
-        (List<? extends WEdge<V, E>>) edges);
+      (List<? extends WEdge<V, E>>) edges);
   }
 }

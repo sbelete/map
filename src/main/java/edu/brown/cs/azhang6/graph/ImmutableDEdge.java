@@ -12,7 +12,7 @@ import java.util.Optional;
  * @param <E> type of edge value
  */
 public class ImmutableDEdge<V, E>
-    extends ImmutableEdge<V, E> implements DEdge<V, E> {
+  extends ImmutableEdge<V, E> implements DEdge<V, E> {
 
   /**
    * Tail vertex.
@@ -32,7 +32,7 @@ public class ImmutableDEdge<V, E>
    * @param head head
    */
   public ImmutableDEdge(
-      Optional<E> value, DVertex<V, E> tail, DVertex<V, E> head) {
+    Optional<E> value, DVertex<V, E> tail, DVertex<V, E> head) {
     super(value, new UnorderedPair<>(tail, head));
     this.tail = tail;
     this.head = head;

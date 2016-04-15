@@ -112,18 +112,18 @@ public class Walk<V, E> {
       // Must have exactly one more vertex than edge
       if (vertices.size() != edges.size() + 1) {
         throw new IllegalStateException("walk must be an "
-            + "alternating list of vertices and edges");
+          + "alternating list of vertices and edges");
       }
       // Endpoints of edges must match adjacent vertices
       for (int i = 0; i < edges.size(); i++) {
         Edge<V, E> e = edges.get(i);
         if (!(e.getEndpoints().s().equals(vertices.get(i))
-            && e.getEndpoints().t().equals(vertices.get(i + 1))
-            || e.getEndpoints().t().equals(vertices.get(i))
-            && e.getEndpoints().s().equals(vertices.get(i + 1)))) {
+          && e.getEndpoints().t().equals(vertices.get(i + 1))
+          || e.getEndpoints().t().equals(vertices.get(i))
+          && e.getEndpoints().s().equals(vertices.get(i + 1)))) {
           throw new IllegalStateException(String.format("edge %d "
-              + "must have endpoints vertex %d and vertex %d",
-              i, i, i + 1));
+            + "must have endpoints vertex %d and vertex %d",
+            i, i, i + 1));
         }
       }
       return new Walk<>(vertices, edges);
@@ -161,7 +161,7 @@ public class Walk<V, E> {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder(String.format(
-        "[Walk:%n%s", vertices.get(0)));
+      "[Walk:%n%s", vertices.get(0)));
     for (int i = 1; i < vertices.size(); i++) {
       sb.append(edges.get(i - 1)).append(vertices.get(i));
     }

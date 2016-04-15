@@ -31,7 +31,7 @@ public class ImmutableVertex<V, E> implements Vertex<V, E> {
    * @param edges incident edges
    */
   public ImmutableVertex(
-      Optional<V> value, List<? extends Edge<V, E>> edges) {
+    Optional<V> value, List<? extends Edge<V, E>> edges) {
     this.value = value;
     this.edges = new ArrayList<>(edges);
   }

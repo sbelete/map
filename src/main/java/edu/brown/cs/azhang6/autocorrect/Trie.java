@@ -10,308 +10,305 @@ import java.util.Map.Entry;
 
 public class Trie implements Collection<String> {
 
-	private int size = 0;
-	private TrieNode base;
+  private int size = 0;
+  private TrieNode base;
 
-	/**
-	 * Returns the base of the Trie
-	 * 
-	 * @return - returns private root for the Trie
-	 */
-	public TrieNode getBase() {
-		return base;
-	}
+  /**
+   * Returns the base of the Trie
+   *
+   * @return - returns private root for the Trie
+   */
+  public TrieNode getBase() {
+    return base;
+  }
 
-	@Override
-	public int size() {
-		return size;
-	}
+  @Override
+  public int size() {
+    return size;
+  }
 
-	/**
-	 * Constructor for Trie
-	 * 
-	 * @param words
-	 *            - a collection of strings
-	 */
-	public Trie(Collection<String> words) {
-		base = makeNode();
+  /**
+   * Constructor for Trie
+   *
+   * @param words - a collection of strings
+   */
+  public Trie(Collection<String> words) {
+    base = makeNode();
 
-		addAll(words);
-	}
+    addAll(words);
+  }
 
-	/**
-	 * Nested class for Trie defining the nodes
-	 * 
-	 * @extends - HashMap
-	 * @types - Key - Character and Value - TrieNode
-	 * @author Simon
-	 *
-	 */
-	protected class TrieNode extends HashMap<Character, TrieNode> {
+  /**
+   * Nested class for Trie defining the nodes
+   *
+   * @author Simon
+   *
+   */
+  protected class TrieNode extends HashMap<Character, TrieNode> {
 
-		// Default serialVersionUID
-		private static final long serialVersionUID = 1L;
+    // Default serialVersionUID
+    private static final long serialVersionUID = 1L;
 
-		// Points to the parent TrieNode
-		TrieNode parent;
+    // Points to the parent TrieNode
+    TrieNode parent;
 
-		// Check to see if a word exists
-		protected boolean word = false;
+    // Check to see if a word exists
+    protected boolean word = false;
 
-		/**
-		 * Constructor for TrieNode Uses HashMap constructor with parameters of
-		 * lowercase letters
-		 */
-		TrieNode() {
-			super();
-		}
+    /**
+     * Constructor for TrieNode Uses HashMap constructor with parameters of
+     * lowercase letters
+     */
+    TrieNode() {
+      super();
+    }
 
-		/**
-		 * To see if the word is valid
-		 * 
-		 * @return
-		 */
-		public boolean validWord() {
-			return word;
-		}
-	}
-	
-	/**
-	 * Nested class for Trie allowing it to be Iterable
-	 * @implements - Iterator
-	 * @type - String
-	 * @author Simon
-	 *
-	 */
-	protected class TrieIterator implements Iterator<String> {
-		private String next;
-		private StringBuilder sb = new StringBuilder();
-		private Deque<Iterator<Entry<Character, TrieNode>>> q = new ArrayDeque<>();
+    /**
+     * To see if the word is valid
+     *
+     * @return if word is valid
+     */
+    public boolean validWord() {
+      return word;
+    }
+  }
 
-		/**
-		 * Iterator for the Trie
-		 * @param node - trie node
-		 * @param prefix - given string
-		 */
-		public TrieIterator(TrieNode node, String s) {
-			sb.append(s);
-			q.push(node.entrySet().iterator());
-			
-			if (node.word) {
-				next = s;
-			} else {
-				findNext();
-			}
-		}
+  /**
+   * Nested class for Trie allowing it to be Iterable
+   *
+   * @author Simon
+   *
+   */
+  protected class TrieIterator implements Iterator<String> {
 
-		/**
-		 * Finds the next node
-		 */
-		private void findNext() {
-			next = null;
-			Iterator<Entry<Character, TrieNode>> iterator = q.peek();
-			
-			while (iterator != null) {
-				while (iterator.hasNext()) {
-					Entry<Character, TrieNode> item = iterator.next();
-					
-					char key = item.getKey();
-					
-					sb.append(key);
-					TrieNode node = item.getValue();
-					iterator = node.entrySet().iterator();
-					
-					q.push(iterator);
-					
-					if (node.word) {
-						next = sb.toString();
-						return;
-					}
-				}
-				
-				q.pop();
-				
-				if (sb.length() > 0) {
-					sb.deleteCharAt(sb.length() - 1);
-				}
-				
-				iterator = q.peek();
-			}
-		}
+    private String next;
+    private StringBuilder sb = new StringBuilder();
+    private Deque<Iterator<Entry<Character, TrieNode>>> q = new ArrayDeque<>();
 
-		@Override
-		public boolean hasNext() {
-			return next != null;
-		}
+    /**
+     * Iterator for the Trie
+     *
+     * @param node - trie node
+     * @param s string
+     */
+    public TrieIterator(TrieNode node, String s) {
+      sb.append(s);
+      q.push(node.entrySet().iterator());
 
-		@Override
-		public String next() {
-			String ret = next;
-			findNext();
-			return ret;
-		}
-	}
-	
-	@Override
-	public boolean isEmpty() {
-		return size == 0;
-	}
+      if (node.word) {
+        next = s;
+      } else {
+        findNext();
+      }
+    }
 
-	/**
-	 * Creates TrieNodes
-	 * 
-	 * @return - constructed new Node
-	 */
-	protected TrieNode makeNode() {
-		return new TrieNode();
-	}
+    /**
+     * Finds the next node
+     */
+    private void findNext() {
+      next = null;
+      Iterator<Entry<Character, TrieNode>> iterator = q.peek();
 
-	@Override
-	public boolean contains(Object o) {
+      while (iterator != null) {
+        while (iterator.hasNext()) {
+          Entry<Character, TrieNode> item = iterator.next();
 
-		if (!(o instanceof String)) {
-			return false;
-		}
+          char key = item.getKey();
 
-		TrieNode node = getNode((String) o);
+          sb.append(key);
+          TrieNode node = item.getValue();
+          iterator = node.entrySet().iterator();
 
-		return node != null && node.validWord();
-	}
+          q.push(iterator);
 
-	/**
-	 * Finds the node for a given word
-	 * 
-	 * @param word
-	 *            - word that is being searched for
-	 * @return - The TrieNode where the word occurs (null otherwise)
-	 */
-	protected TrieNode getNode(String word) {
-		TrieNode node = base;
+          if (node.word) {
+            next = sb.toString();
+            return;
+          }
+        }
 
-		for (char c : word.toCharArray()) {
-			node = node.get(c);
+        q.pop();
 
-			if (node == null) {
-				return null;
-			}
-		}
+        if (sb.length() > 0) {
+          sb.deleteCharAt(sb.length() - 1);
+        }
 
-		return node;
-	}
+        iterator = q.peek();
+      }
+    }
 
-	/**
-	 * Checks to see if the string is a prefix Node
-	 * 
-	 * @param s
-	 *            - string that is being searched for
-	 * @return - returns true if it is contained in the Trie
-	 */
-	public boolean prefix(String s) {
-		return getNode(s) != null;
-	}
+    @Override
+    public boolean hasNext() {
+      return next != null;
+    }
 
-	@Override
-	public boolean add(String word) {
-		TrieNode n = base;
+    @Override
+    public String next() {
+      String ret = next;
+      findNext();
+      return ret;
+    }
+  }
 
-		// Adds word to Trie
-		for (char l : word.toCharArray()) {
+  @Override
+  public boolean isEmpty() {
+    return size == 0;
+  }
 
-			TrieNode next = n.get(l);
+  /**
+   * Creates TrieNodes
+   *
+   * @return - constructed new Node
+   */
+  protected TrieNode makeNode() {
+    return new TrieNode();
+  }
 
-			if (next == null) {
-				next = makeNode();
-				n.put(l, next);
-				next.parent = n;
-			}
+  @Override
+  public boolean contains(Object o) {
 
-			n = next;
-		}
+    if (!(o instanceof String)) {
+      return false;
+    }
 
-		// Check to see if Trie has been added to
-		if (n.validWord()) {
-			return false;
-		} else {
-			n.word = true;
-			size++;
-			return true;
-		}
-	}
+    TrieNode node = getNode((String) o);
 
-	@Override
-	public boolean addAll(Collection<? extends String> w) {
-		boolean added = false;
+    return node != null && node.validWord();
+  }
 
-		for (String word : w) {
-			if (add(word))
-				added = true;
-		}
+  /**
+   * Finds the node for a given word
+   *
+   * @param word - word that is being searched for
+   * @return - The TrieNode where the word occurs (null otherwise)
+   */
+  protected TrieNode getNode(String word) {
+    TrieNode node = base;
 
-		return added;
-	}
+    for (char c : word.toCharArray()) {
+      node = node.get(c);
 
-	@Override
-	public Iterator<String> iterator() {
-		return new TrieIterator(base, ""); // check
-	}
+      if (node == null) {
+        return null;
+      }
+    }
 
-	@Override
-	public Object[] toArray() {
-		Object[] retArr = new Object[size];
-		Iterator<String> iter = iterator();
+    return node;
+  }
 
-		int i = 0;
+  /**
+   * Checks to see if the string is a prefix Node
+   *
+   * @param s - string that is being searched for
+   * @return - returns true if it is contained in the Trie
+   */
+  public boolean prefix(String s) {
+    return getNode(s) != null;
+  }
 
-		while (iter.hasNext()) {
-			retArr[i] = iter.next();
-			i++;
-		}
+  @Override
+  public boolean add(String word) {
+    TrieNode n = base;
 
-		return retArr;
-	}
+    // Adds word to Trie
+    for (char l : word.toCharArray()) {
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> T[] toArray(T[] a) {
-		T[] retArr = null;
-		if (size() > a.length) {
-			retArr = (T[]) Array.newInstance(a.getClass().getComponentType(), size());
-		}
-		Iterator<String> iter = iterator();
-		int i = 0;
-		while (iter.hasNext()) {
-			retArr[i++] = (T) iter.next();
-		}
-		return retArr;
-	}
+      TrieNode next = n.get(l);
 
-	@Override
-	public boolean containsAll(Collection<?> c) {
-		// Unneeded method for my implementation
-		return false;
-	}
+      if (next == null) {
+        next = makeNode();
+        n.put(l, next);
+        next.parent = n;
+      }
 
-	@Override
-	public boolean retainAll(Collection<?> c) {
-		// Static Trie that doesn't remove elements
-		return false;
-	}
+      n = next;
+    }
 
-	@Override
-	public boolean removeAll(Collection<?> c) {
-		// Static Trie that doesn't remove elements
-		return false;
-	}
+    // Check to see if Trie has been added to
+    if (n.validWord()) {
+      return false;
+    } else {
+      n.word = true;
+      size++;
+      return true;
+    }
+  }
 
-	@Override
-	public boolean remove(Object o) {
-		// Static Trie that doesn't remove elements
-		return false;
-	}
+  @Override
+  public boolean addAll(Collection<? extends String> w) {
+    boolean added = false;
 
-	@Override
-	public void clear() {
-		// Static Trie that doesn't remove elements
-	}
+    for (String word : w) {
+      if (add(word)) {
+        added = true;
+      }
+    }
+
+    return added;
+  }
+
+  @Override
+  public Iterator<String> iterator() {
+    return new TrieIterator(base, ""); // check
+  }
+
+  @Override
+  public Object[] toArray() {
+    Object[] retArr = new Object[size];
+    Iterator<String> iter = iterator();
+
+    int i = 0;
+
+    while (iter.hasNext()) {
+      retArr[i] = iter.next();
+      i++;
+    }
+
+    return retArr;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> T[] toArray(T[] a) {
+    T[] retArr = null;
+    if (size() > a.length) {
+      retArr = (T[]) Array.newInstance(a.getClass().getComponentType(), size());
+    }
+    Iterator<String> iter = iterator();
+    int i = 0;
+    while (iter.hasNext()) {
+      retArr[i++] = (T) iter.next();
+    }
+    return retArr;
+  }
+
+  @Override
+  public boolean containsAll(Collection<?> c) {
+    // Unneeded method for my implementation
+    return false;
+  }
+
+  @Override
+  public boolean retainAll(Collection<?> c) {
+    // Static Trie that doesn't remove elements
+    return false;
+  }
+
+  @Override
+  public boolean removeAll(Collection<?> c) {
+    // Static Trie that doesn't remove elements
+    return false;
+  }
+
+  @Override
+  public boolean remove(Object o) {
+    // Static Trie that doesn't remove elements
+    return false;
+  }
+
+  @Override
+  public void clear() {
+    // Static Trie that doesn't remove elements
+  }
 
 }

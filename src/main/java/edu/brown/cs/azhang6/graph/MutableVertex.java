@@ -21,7 +21,7 @@ public class MutableVertex<V, E> extends ImmutableVertex<V, E> {
    * @param edges list of incident edges
    */
   public MutableVertex(
-      Optional<V> value, List<? extends ImmutableEdge<V, E>> edges) {
+    Optional<V> value, List<? extends ImmutableEdge<V, E>> edges) {
     super(value, edges);
   }
 

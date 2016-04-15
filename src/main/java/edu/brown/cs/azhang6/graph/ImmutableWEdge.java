@@ -12,7 +12,7 @@ import java.util.Optional;
  * @param <E> type of edge value
  */
 public class ImmutableWEdge<V, E>
-    extends ImmutableEdge<V, E> implements WEdge<V, E> {
+  extends ImmutableEdge<V, E> implements WEdge<V, E> {
 
   /**
    * Weight.
@@ -28,7 +28,7 @@ public class ImmutableWEdge<V, E>
    * @param weight weight
    */
   public ImmutableWEdge(Optional<E> value,
-      UnorderedPair<? extends Vertex<V, E>> endpoints, double weight) {
+    UnorderedPair<? extends Vertex<V, E>> endpoints, double weight) {
     super(value, endpoints);
     this.weight = weight;
   }
@@ -47,6 +47,6 @@ public class ImmutableWEdge<V, E>
   @Override
   public String toString() {
     return String.format("[value=%s, weight=%f: %s <-> %s]",
-        value, weight, endpoints.s(), endpoints.t());
+      value, weight, endpoints.s(), endpoints.t());
   }
 }

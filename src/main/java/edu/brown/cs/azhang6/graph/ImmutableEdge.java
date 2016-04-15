@@ -30,7 +30,7 @@ public class ImmutableEdge<V, E> implements Edge<V, E> {
    * @param endpoints endpoints
    */
   public ImmutableEdge(Optional<E> value,
-      UnorderedPair<? extends Vertex<V, E>> endpoints) {
+    UnorderedPair<? extends Vertex<V, E>> endpoints) {
     this.value = value;
     this.endpoints = endpoints;
   }
@@ -57,6 +57,6 @@ public class ImmutableEdge<V, E> implements Edge<V, E> {
   @Override
   public String toString() {
     return String.format(
-        "[value=%s: %s <-> %s]", value, endpoints.s(), endpoints.t());
+      "[value=%s: %s <-> %s]", value, endpoints.s(), endpoints.t());
   }
 }

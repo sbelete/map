@@ -21,7 +21,7 @@ public class MutableDWEdge<V, E> extends ImmutableDWEdge<V, E> {
    * @param weight weight
    */
   public MutableDWEdge(Optional<E> value,
-      DWVertex<V, E> tail, DWVertex<V, E> head, double weight) {
+    DWVertex<V, E> tail, DWVertex<V, E> head, double weight) {
     super(value, tail, head, weight);
   }
 

@@ -57,7 +57,7 @@ class KDTreeOracle<T extends Dimensional> {
    * List of elements to generate queries with.
    */
   private final ArrayList<T> elements = new ArrayList<>();
-  
+
   /**
    * Constructor.
    */
@@ -74,36 +74,36 @@ class KDTreeOracle<T extends Dimensional> {
    * @throws NullPointerException if either argument is null
    */
   KDTreeOracle(KDVertex<T> subject, List<T> elements)
-      throws IllegalArgumentException, NullPointerException {
+    throws IllegalArgumentException, NullPointerException {
     if (subject == null) {
       throw new NullPointerException(
-          "Constructing KDTreeOracle with null subject");
+        "Constructing KDTreeOracle with null subject");
     }
     this.subject = subject;
     if (elements == null) {
       throw new NullPointerException(
-          "Constructing KDTreeOracle with null list");
+        "Constructing KDTreeOracle with null list");
     }
     if (elements.isEmpty()) {
       throw new IllegalArgumentException(
-          "Constructing KDTreeOracle with no elements");
+        "Constructing KDTreeOracle with no elements");
     }
     this.correct = new KDTreeStub<>(elements);
     this.elements.addAll(elements);
   }
-  
+
   /**
    * Same as before, but allows providing a constructor for generating inexact
    * input.
-   * 
+   *
    * @param subject subject
    * @param elements elements
    * @param constructor constructor
    */
   KDTreeOracle(KDVertex<T> subject, List<T> elements,
-      Function<double[], ? extends Dimensional> constructor) {
-      this(subject, elements);
-      this.constructor = constructor;
+    Function<double[], ? extends Dimensional> constructor) {
+    this(subject, elements);
+    this.constructor = constructor;
   }
 
   /**
@@ -115,7 +115,7 @@ class KDTreeOracle<T extends Dimensional> {
    */
   boolean testNearestNeighbors() {
     return testNearestNeighbors(this::generateDimensionalExact)
-        && testNearestNeighbors(this::generateDimensionalInexact);
+      && testNearestNeighbors(this::generateDimensionalInexact);
   }
 
   /**
@@ -142,7 +142,7 @@ class KDTreeOracle<T extends Dimensional> {
         return false;
       }
       List<DimensionalDistance<T>> correctOutput
-          = correct.nearestNeighbors(queryInput, n, pred);
+        = correct.nearestNeighbors(queryInput, n, pred);
 
       // Check subject's output for validity
       if (!isValid(subjectOutput, correctOutput, queryInput)) {
@@ -161,7 +161,7 @@ class KDTreeOracle<T extends Dimensional> {
    */
   boolean testRadiusSearch() {
     return testRadiusSearch(this::generateDimensionalExact)
-        && testRadiusSearch(this::generateDimensionalInexact);
+      && testRadiusSearch(this::generateDimensionalInexact);
   }
 
   /**
@@ -188,7 +188,7 @@ class KDTreeOracle<T extends Dimensional> {
         return false;
       }
       List<DimensionalDistance<T>> correctOutput
-          = correct.withinRadius(queryInput, r, pred);
+        = correct.withinRadius(queryInput, r, pred);
 
       // Check subject's output for validity
       if (!isValid(subjectOutput, correctOutput, queryInput)) {
@@ -219,12 +219,12 @@ class KDTreeOracle<T extends Dimensional> {
     Dimensional e2 = elements.get((int) (Math.random() * elements.size()));
     double[] coordinates = new double[e1.numDimensions()];
     for (int i = 0; i < coordinates.length; i++) {
-        double random = Math.random();
-        coordinates[i] =
-            random * e1.getCoordinate(i) + (1 - random) * e2.getCoordinate(i);
+      double random = Math.random();
+      coordinates[i]
+        = random * e1.getCoordinate(i) + (1 - random) * e2.getCoordinate(i);
     }
     if (constructor == null) {
-        return new Point(coordinates);
+      return new Point(coordinates);
     }
     return constructor.apply(coordinates);
   }
@@ -281,12 +281,12 @@ class KDTreeOracle<T extends Dimensional> {
    * @throws NullPointerException if dimensional is null
    */
   private boolean isValid(List<DimensionalDistance<T>> subjectOutput,
-      List<DimensionalDistance<T>> correctOutput,
-      Dimensional queryPoint) {
+    List<DimensionalDistance<T>> correctOutput,
+    Dimensional queryPoint) {
     // Check validity of arguments
     if (queryPoint == null) {
       throw new NullPointerException(
-          "Calling isValid() with null dimensional");
+        "Calling isValid() with null dimensional");
     }
 
     // Check that both outputs are null or not null
@@ -322,11 +322,11 @@ class KDTreeOracle<T extends Dimensional> {
         return false;
       }
       if (Math.abs(subjectDD.getDistance() - correctDD.getDistance())
-          > EPSILON) {
+        > EPSILON) {
         return false;
       }
       if (Math.abs(subjectDD.getDimensional().distanceTo(queryPoint)
-          - subjectDD.getDistance()) > EPSILON) {
+        - subjectDD.getDistance()) > EPSILON) {
         return false;
       }
     }

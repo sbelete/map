@@ -29,7 +29,7 @@ public interface WEdge<V, E> extends Edge<V, E> {
    */
   default UnorderedPair<? extends WVertex<V, E>> getWEndpoints() {
     return new UnorderedPair<>(
-        (WVertex<V, E>) getEndpoints().s(), (WVertex<V, E>) getEndpoints().t());
+      (WVertex<V, E>) getEndpoints().s(), (WVertex<V, E>) getEndpoints().t());
   }
 
   /**

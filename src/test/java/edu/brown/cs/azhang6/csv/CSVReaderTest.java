@@ -23,14 +23,14 @@ public class CSVReaderTest {
     // Valid CSVReader
     CSVReader instance1 = new CSVReader("files/stardata.csv", ",");
     assertTrue(instance1.toString().equals(
-        "CSVReader reading file files/stardata.csv using delimiter ,"));
+      "CSVReader reading file files/stardata.csv using delimiter ,"));
     instance1.close();
 
     // Valid CSVReader with a different delimiter
     CSVReader instance2 = new CSVReader("files/space-delimited.csv", " ");
     assertTrue(instance2.toString().equals(
-        "CSVReader reading file files/space-delimited.csv using "
-        + "delimiter  "));
+      "CSVReader reading file files/space-delimited.csv using "
+      + "delimiter  "));
     instance2.close();
 
     // Nonexistent file
@@ -55,7 +55,7 @@ public class CSVReaderTest {
     boolean caught5 = false;
     try {
       CSVReader instance5
-          = new CSVReader("files/duplicate-tags.csv", ",");
+        = new CSVReader("files/duplicate-tags.csv", ",");
     } catch (ParseException e) {
       caught5 = true;
     }

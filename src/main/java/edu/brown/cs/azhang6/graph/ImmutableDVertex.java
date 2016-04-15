@@ -12,7 +12,7 @@ import java.util.Optional;
  * @param <E> type of edge value
  */
 public class ImmutableDVertex<V, E>
-    extends ImmutableVertex<V, E> implements DVertex<V, E> {
+  extends ImmutableVertex<V, E> implements DVertex<V, E> {
 
   /**
    * New immutable digraph vertex with optional value and list of out-edges.
@@ -21,7 +21,7 @@ public class ImmutableDVertex<V, E>
    * @param edges out-edges
    */
   public ImmutableDVertex(
-      Optional<V> value, List<? extends DEdge<V, E>> edges) {
+    Optional<V> value, List<? extends DEdge<V, E>> edges) {
     super(value, edges);
   }
 
@@ -31,6 +31,6 @@ public class ImmutableDVertex<V, E>
   @Override
   public List<? extends DEdge<V, E>> getDEdges() {
     return Collections.unmodifiableList(
-        (List<? extends DEdge<V, E>>) edges);
+      (List<? extends DEdge<V, E>>) edges);
   }
 }

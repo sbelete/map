@@ -35,6 +35,6 @@ public interface Edge<V, E> {
    */
   default void setEndpoints(UnorderedPair<? extends Vertex<V, E>> endpoints) {
     throw new UnsupportedOperationException(
-        "setEndpoints() not implemented");
+      "setEndpoints() not implemented");
   }
 }

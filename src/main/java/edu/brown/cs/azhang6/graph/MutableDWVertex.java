@@ -21,7 +21,7 @@ public class MutableDWVertex<V, E> extends ImmutableDWVertex<V, E> {
    * @param edges out-edges
    */
   public MutableDWVertex(
-      Optional<V> value, List<? extends DWEdge<V, E>> edges) {
+    Optional<V> value, List<? extends DWEdge<V, E>> edges) {
     super(value, edges);
   }
 
