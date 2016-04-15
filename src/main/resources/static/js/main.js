@@ -149,7 +149,6 @@ function repainter(nodesJSON){
 	// Edges in the shortest path
 	var pathEdges = nodesObject.pathEdges;
 	var length = nodesObject.length;
-	console.log(pathEdges);
 	if(jQuery.isEmptyObject(pathEdges)){
 		document.getElementById("enterMessages").innerHTML = 'There isn\'t a path';
 	} else {
@@ -194,7 +193,7 @@ function repainter(nodesJSON){
 		document.getElementById("gtd").style = "color:red";
 	}
 	
-	if(start[0] != null && finish[0] != null]){
+	if(start[0] != null && finish[0] != null){
 		document.getElementById("enterButton").style = "color:green";
 	}else{
 		document.getElementById("enterButton").style = "color:red";
