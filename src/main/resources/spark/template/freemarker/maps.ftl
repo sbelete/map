@@ -64,7 +64,7 @@ Destination Street 2: <input list="autoF2" type="text"  id ="streetF2" name="str
 <br><br>
 
 <div id= "enter">
-<button id = "enter" style= "color:red" onclick="shortestPath()"/>Enter</button>
+<button id = "enterButton" style= "color:red" onclick="shortestPath()"/>Enter</button>
 </div>
 <p id="enterMessages"></p>
 
