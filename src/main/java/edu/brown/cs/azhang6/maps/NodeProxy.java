@@ -59,16 +59,9 @@ public class NodeProxy extends Node {
     Connection conn = db.getConnection();
     try (PreparedStatement prep = conn.prepareStatement(
       "SELECT * FROM node WHERE id=?;")) {
-      if (Main.done) {
-        System.out.println("prep closed 0? " + prep.isClosed());
-      }
       prep.setString(1, id);
       return db.query(prep, r -> {
         try {
-          if (Main.done) {
-            System.out.println("prep closed 1? " + prep.isClosed());
-            System.out.println("rs closed 1? " + r.isClosed());
-          }
           r.next();
           double[] latLng = new double[2];
           latLng[0] = r.getDouble("latitude");

@@ -19,7 +19,7 @@ public class Star implements Dimensional {
   /**
    * Star ID.
    */
-  private final int ID;
+  private final int id;
 
   /**
    * Proper name. Can be an empty string, but not {@code null}.
@@ -36,14 +36,14 @@ public class Star implements Dimensional {
    * coordinates. If the proper name is {@code null}, the empty string will be
    * used instead.
    *
-   * @param ID star ID
+   * @param id star ID
    * @param name proper name, can be empty
    * @param x x-coordinate
    * @param y y-coordinate
    * @param z z-coordinate
    */
-  public Star(int ID, String name, double x, double y, double z) {
-    this.ID = ID;
+  public Star(int id, String name, double x, double y, double z) {
+    this.id = id;
     this.name = name == null ? "" : name;
     coordinates[0] = x;
     coordinates[1] = y;
@@ -83,7 +83,7 @@ public class Star implements Dimensional {
    * @return star ID
    */
   public int getID() {
-    return ID;
+    return id;
   }
 
   /**
@@ -139,7 +139,7 @@ public class Star implements Dimensional {
   public String toString() {
     return String.format(
       "Star with ID %d, name %s, and coordinates (%f, %f, %f)",
-      ID, name, getX(), getY(), getZ());
+      id, name, getX(), getY(), getZ());
   }
 
   /**
@@ -155,7 +155,7 @@ public class Star implements Dimensional {
       return false;
     }
     Star other = (Star) o;
-    return this.ID == other.ID
+    return this.id == other.id
       && this.name.equals(other.name)
       && this.getX() == other.getX()
       && this.getY() == other.getY()
@@ -169,18 +169,18 @@ public class Star implements Dimensional {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(ID, name, getX(), getY(), getZ());
+    return Objects.hash(id, name, getX(), getY(), getZ());
   }
 
   @Override
   public Dimensional withCoordinate(int coordinate, double value) {
     switch (coordinate) {
       case 0:
-        return new Star(ID, name, value, getY(), getZ());
+        return new Star(id, name, value, getY(), getZ());
       case 1:
-        return new Star(ID, name, getX(), value, getZ());
+        return new Star(id, name, getX(), value, getZ());
       case 2:
-        return new Star(ID, name, getX(), getY(), value);
+        return new Star(id, name, getX(), getY(), value);
       default:
         throw new IllegalArgumentException("coordinate must be 0, 1, or 2");
     }

@@ -67,6 +67,8 @@ Some extra stuff
 ---
 
 - We added a --traffic-port=port option that allows you to specify the port of the traffic server.  The default is 8080.
+- On the frontend, the user clicks the Enter button to tell the program to find the shortest path.  If a shortest path is found: not only is the path drawn on the map, but the distance of the path is displayed.  If no path is found, the user is told that there is no path.
+- On the frontend, we have two buttons "Go to Start" and "Go to Destination" that, when clicked, center the map on the start point or the end point.  This makes it easy to navigate the map when looking for a shortest path.
 
 ---
 How to run tests
@@ -74,6 +76,7 @@ How to run tests
 
 Our JUnit tests should run automatically when you run "mvn package".
 Our cs032_system_tester tests are in the tests directory.  We made some test databases in the files directory to test our program.
+Our tests using a large dataset are commented out in MainTest.java; see next section for more.
 
 ---
 Tests you wrote and tried by hand
@@ -83,7 +86,7 @@ As mentioned a few times in the previous sections, sometimes we ran our program 
 
 Another test done by hand: testing that updating traffic works on the frontend.  We chose to color lines green if they had low traffic (less than 2), yellow for medium (2 to 5), and red for high.  Since we only receive a few edges from the traffic server (compared to the total number of ways), sometimes when we run the program everything just appears green.  To test that our display really was working, we changed the Javascript in the browser to change the thresholds (so for example, everything more than 1 turns yellow), and we saw the changes we wanted.
 
-A note about one of our JUnit tests: in MainTest.java, we commented out the annotations that make JUnit run the tests--we already ran these tests successfully before handing in, and we commented these out so "mvn package" won't take too long.
+A note about one of our JUnit tests: in MainTest.java, we commented out the annotations that make JUnit run the tests--we already ran these tests successfully before handing in, and we commented these out so "mvn package" won't take too long, since these tests all use a large dataset.
 
 Another quick note about tests: for some parts of the program such as the KDTree, we wrote oracles to help conduct even more automated testing beyond individual JUnit tests and cs032_system_tester tests.  By using our oracle, we determined that our KD-tree was working correctly when we made it handle latitude/longitude.
 

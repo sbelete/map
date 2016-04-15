@@ -10,7 +10,8 @@ import java.util.List;
 
 /**
  * Reads a CSV-formatted stars file. A properly formatted stars file must have a
- * header on the first line and five fields on each line: null {@value StarsReader#ID}, {@value StarsReader#NAME}, {@value StarsReader#X},
+ * header on the first line and five fields on each line:
+ * {@value StarsReader#ID}, {@value StarsReader#NAME}, {@value StarsReader#X},
  * {@value StarsReader#Y}, and {@value StarsReader#Z} (without the quotes).
  *
  * @author aaronzhang

@@ -10,7 +10,7 @@ import java.util.Map.Entry;
 
 /**
  * Trie.
- * 
+ *
  * @author Simon
  */
 public class Trie implements Collection<String> {
@@ -62,7 +62,7 @@ public class Trie implements Collection<String> {
 
     /**
      * Constructor for TrieNode Uses HashMap constructor with parameters of
-     * lowercase letters
+     * lowercase letters.
      */
     TrieNode() {
       super();

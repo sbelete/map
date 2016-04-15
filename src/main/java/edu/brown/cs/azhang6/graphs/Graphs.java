@@ -200,7 +200,7 @@ public final class Graphs {
    * @return minimum-weight walk from start to end, or null if no such walk
    */
   public static <V, E, T extends WVertex<V, E>> OrderedPair<Walk<V, E>, Double>
-    dijkstraAStar(T root, Predicate<T> stop,
+  dijkstraAStar(T root, Predicate<T> stop,
       ToDoubleFunction<? super T> heuristic) {
     // Same idea as dijkstra, but include the heuristic
     if (stop.test(root)) {
@@ -259,8 +259,8 @@ public final class Graphs {
    * @return minimum-weight walk from start to end, or null if no such walk
    */
   public static <V, E, T extends WVertex<V, E>> OrderedPair<Walk<V, E>, Double>
-    dijkstraAStarFail(T root, Predicate<T> stop,
-      ToDoubleFunction<? super T> heuristic, double failLimit, int maxVertices) {
+  dijkstraAStarFail(T root, Predicate<T> stop,
+    ToDoubleFunction<? super T> heuristic, double failLimit, int maxVertices) {
     // Same idea as dijkstra, but include the heuristic
     if (stop.test(root)) {
       return new OrderedPair<>(new Walk.Builder<>(root).build(), 0D);

@@ -50,9 +50,11 @@ public class LatLngKDTree<T extends LatLng> implements KDVertex<T> {
     LatLng original = (LatLng) orig;
     double originalLng = original.getLng();
     if (originalLng > 0) {
-      return original.withCoordinate(1, originalLng - 360);
+      return original.withCoordinate(1, originalLng
+        - (LatLng.MAX_LNG - LatLng.MIN_LNG));
     } else if (originalLng < 0) {
-      return original.withCoordinate(1, originalLng + 360);
+      return original.withCoordinate(1, originalLng
+        + (LatLng.MAX_LNG - LatLng.MIN_LNG));
     }
     return original;
   }
