@@ -20,19 +20,17 @@
 
 #forms {
 	position: absolute;
-	top : 100px;
+	top : 75px;
 	left :650px;
 }
 
 
 #word_maps {
 	position: absolute;
-	top :  10px;
+	top :  0px;
 	left : 650px; 
 	font-size : 50px;
 }
-
-
 
 h1 {
     font-size: xx-large;

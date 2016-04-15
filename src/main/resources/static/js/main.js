@@ -117,6 +117,22 @@ function shortestPath() {
 	}
 };
 
+function goToStart(){
+	if(start[0] != null){
+		latitude = start[1];
+		longitude = start[2];
+		repaint();
+	}
+};
+
+function goToDest(){
+	if(finish[0] != null){
+		latitude = finish[1];
+		longitude = finish[2];
+		repaint();
+	}
+};
+
 function repaint(){
 	var postParameters = {lat : latitude, lon : longitude, s : size};
 	$.post("/getEdges", postParameters, repainter);
@@ -239,154 +255,110 @@ var inputS1 = $("#streetS1");
 
 // Suggestion textboxes
 var correctionsS1 =
-    [$("#suggestS11"),
-    $("#suggestS12"),
-    $("#suggestS13"),
-    $("#suggestS14"),
-    $("#suggestS15")];
+    [$("#suggestS11")[0],
+    $("#suggestS12")[0],
+    $("#suggestS13")[0],
+    $("#suggestS14")[0],
+    $("#suggestS15")[0]];
 
 // Input textbox
 var inputS2 = $("#streetS2");
 // Suggestion textboxes
-var boxes2 =
-    [$("#sug21"),
-    $("#sug22"),
-    $("#sug23"),
-    $("#sug24"),
-    $("#sug25")];
+var correctionsS2 =
+    [$("#suggestS21")[0],
+    $("#suggestS22")[0],
+    $("#suggestS23")[0],
+    $("#suggestS24")[0],
+    $("#suggestS25")[0]];
 
     // Input textbox
     var inputF1 = $("#streetF1");
     // Suggestion textboxes
-    var boxes3 =
-        [$("#sug31"),
-        $("#sug32"),
-        $("#sug33"),
-        $("#sug34"),
-        $("#sug35")];
+    var correctionsF1 =
+        [$("#suggestF11")[0],
+        $("#suggestF12")[0],
+        $("#suggestF13")[0],
+        $("#suggestF14")[0],
+        $("#suggestF15")[0]];
 
     // Input textbox
     var inputF2 = $("#streetF2");
     // Suggestion textboxes
-    var boxes4 =
-        [$("#sug41"),
-        $("#sug42"),
-        $("#sug43"),
-        $("#sug44"),
-        $("#sug45")];
-
-/*
-// Color of a suggestion box that has a suggestion
-var suggestionColor = "white";
-// Color of a suggestion box that doesn't have a suggestion
-var noSuggestionColor = "rgb(200, 200, 200)";
-// Color of a suggestion box that has a suggestion and is moused-over
-var highlightedColor = "orange";
-*/
+    var correctionsF2 =
+        [$("#suggestF21")[0],
+        $("#suggestF22")[0],
+        $("#suggestF23")[0],
+        $("#suggestF24")[0],
+        $("#suggestF25")[0]];
     
 // When the input text box is updated, get suggestions
 //inputS1.on("keyup", getSuggestions1);
 inputS1.keyup(function(e){
 
+	if(inputS1[0].value != ""){
     var postParameters = {street_name: inputS1[0].value};
 	$.post("/auto", postParameters, function(suggestionsJSON){
 		console.log(suggestionsJSON);
-		setSuggestions(JSON.parse(suggestionsJSON), correctionsS1);
+		setSuggestions(JSON.parse(suggestionsJSON)[0], correctionsS1);
 	});
-	
+	}
 });
-// Makes a post request to get suggestions for input
+
+// Events for each suggestion box
+
+//When the input text box is updated, get suggestions
+//inputS1.on("keyup", getSuggestions1);
+inputS2.keyup(function(e){
+	
+if(inputS2[0].value != ""){
+  var postParameters = {street_name: inputS2[0].value};
+	$.post("/auto", postParameters, function(suggestionsJSON){
+		console.log(suggestionsJSON);
+		setSuggestions(JSON.parse(suggestionsJSON)[0], correctionsS2);
+	});
+}
+});
+
+
+
+//When the input text box is updated, get suggestions
+//inputS1.on("keyup", getSuggestions1);
+inputF1.keyup( function(e){
+
+if(inputF1[0].value != ""){
+  var postParameters = {street_name: inputF1[0].value};
+	$.post("/auto", postParameters, function(suggestionsJSON){
+		console.log(suggestionsJSON);
+		setSuggestions(JSON.parse(suggestionsJSON)[0], correctionsF1);
+	});
+}
+});
+
+
+//When the input text box is updated, get suggestions
+//inputS1.on("keyup", getSuggestions1);
+inputF2.keyup(function(e){
+if(inputF2[0].value != ""){
+  var postParameters = {street_name: inputF2[0].value};
+	$.post("/auto", postParameters, function(suggestionsJSON){
+		console.log(suggestionsJSON);
+		setSuggestions(JSON.parse(suggestionsJSON)[0], correctionsF2);
+	});
+}
+});
+
+
 function setSuggestions(listSuggest, suggestions) {
 	
 	console.log("In Suggestions");
 	var i;
 	for(i = 0; i < 5 && i < listSuggest.length; i++){
 		console.log(listSuggest[i]);
-		suggestions[i][0].value = listSuggest[i];
+		suggestions[i].value = listSuggest[i];
 	}
 	
 	for(i; i < 5; i++){
 		console.log("Empty");
-		suggestions[i] ="";
+		suggestions[i].value ="";
 	}
 };
-
-// Displays a list of suggestions
-function showSuggestions1(suggestionsJSON) {
-    // Get the suggestions list
- 
-}
-
-// Clears all suggestions
-function clearSuggestions1() {
- 
-}
-
-// Events for each suggestion box
-
-// When the input text box is updated, get suggestions
-inputS2.on("keyup", getSuggestions2);
-
-// Makes a post request to get suggestions for input
-function getSuggestions2() {
-    var postParameters = {input: inputS2[0].value, on: true};
-    $.post("/auto2", postParameters, showSuggestions2);
-}
-
-// Displays a list of suggestions
-function showSuggestions2(suggestionsJSON) {
-    // Get the suggestions list
-  
-}
-
-// Clears all suggestions
-function clearSuggestions2() {
-    
-}
-
-
-// When the input text box is updated, get suggestions
-inputF1.on("keyup", getSuggestions3);
-
-// Makes a post request to get suggestions for input
-function getSuggestions3() {
-    var postParameters = {input: inputF1[0].value, on: true};
-    $.post("/auto", postParameters, showSuggestions3);
-}
-
-// Displays a list of suggestions
-function showSuggestions3(suggestionsJSON) {
-  
-}
-
-// Clears all suggestions
-function clearSuggestions3() {
-  
-}
-
-// When the input text box is updated, get suggestions
-inputF2.on("keyup", getSuggestions4);
-
-// Makes a post request to get suggestions for input
-function getSuggestions4() {
-    var postParameters = {input: inputF2[0].value, on: true};
-    $.post("/auto", postParameters, showSuggestions4);
-}
-
-// Displays a list of suggestions
-function showSuggestions4(suggestionsJSON) {
-   
-}
-
-// Clears all suggestions
-function clearSuggestions4() {
-    for (var i = 0; i < boxes4.length; i++) {
-        var box = boxes4[i][0];
-        box.style.backgroundColor = noSuggestionColor;
-        box.value = "";
-    }
-}
-
-
-
-

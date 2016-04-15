@@ -9,18 +9,18 @@
 <div id= "forms">
 
 <div id= "div1">
-Start Street 1: <input list="autoS1" type="text"  id ="streetS1" name="streetS1" value=""/><br><br>
+Start Street 1: <input list="autoS1" type="text"  id ="streetS1" name="streetS1" value=""/><br>
 <datalist id="autoS1">
-    <option id ="suggestS11" value=""/>
-    <option id ="suggestS12" value=""/>
-    <option id ="suggestS13" value=""/>
-    <option id ="suggestS14" value=""/>
-    <option id ="suggestS15" value=""/>
+    <option id ="suggestS11" type="text" value=""/>
+    <option id ="suggestS12" type="text" value=""/>
+    <option id ="suggestS13" type="text" value=""/>
+    <option id ="suggestS14" type="text" value=""/>
+    <option id ="suggestS15" type="text" value=""/>
 </datalist>
 </div>
 
 <div id= "div2">
-Start Street 2: <input list="autoS2" type="text"  id ="streetS1" name="streetS2" value=""/><br><br>
+Start Street 2: <input list="autoS2" type="text"  id ="streetS2" name="streetS2" value=""/><br><br>
 <datalist id="autoS2">
     <option id ="suggestS21" value=""/>
     <option id ="suggestS22" value=""/>
@@ -28,41 +28,47 @@ Start Street 2: <input list="autoS2" type="text"  id ="streetS1" name="streetS2"
     <option id ="suggestS24" value=""/>
     <option id ="suggestS25" value=""/>
 </datalist>
-<div id/>
+<div/>
 
 <button id="submitS" onclick="textEnterS()"> Submit </button>
 <button id="clearS" onclick="clearTextS()"> Clear </button>
-
 <br><br>
+<button id="gos" style= "color:red" onclick="goToStart()"/> Go to Start </button>
+<br>
 <div id= "div3">
 Destination Street 1: <input list="autoF1" type="text"  id ="streetF1" name="streetF1" value=""/><br><br>
 <datalist id="autoF1">
-    <option id ="suggestS31" value=""/>
-    <option id ="suggestS32" value=""/>
-    <option id ="suggestS33" value=""/>
-    <option id ="suggestS34" value=""/>
-    <option id ="suggestS35" value=""/>
+    <option id ="suggestF11" value=""/>
+    <option id ="suggestF12" value=""/>
+    <option id ="suggestF13" value=""/>
+    <option id ="suggestF14" value=""/>
+    <option id ="suggestF15" value=""/>
 </datalist>
 <div/>
 
 <div id= "div4">
 Destination Street 2: <input list="autoF2" type="text"  id ="streetF2" name="streetF2" value=""/><br><br>
 <datalist id="autoF2">
-    <option id ="suggestS41" value=""/>
-    <option id ="suggestS42" value=""/>
-    <option id ="suggestS43" value=""/>
-    <option id ="suggestS44" value=""/>
-    <option id ="suggestS45" value=""/>
+    <option id ="suggestF21" value=""/>
+    <option id ="suggestF22" value=""/>
+    <option id ="suggestF23" value=""/>
+    <option id ="suggestF24" value=""/>
+    <option id ="suggestF25" value=""/>
 </datalist>
 <div/>
 
 <button id="submitF" onclick="textEnterF()"> Submit </button>
 <button  id="clearF" onclick="clearTextF()"> Clear </button>
+<br><br>
+<button id="gtd" style= "color:red" onclick="goToDest()"/> Go to Destination </button>
 <br><br><br>
+
 <div id= "enter">
 <button id = "enter" style= "color:red" onclick="shortestPath()"/>Enter</button>
 </div>
+
 </div>
+
 </div>
 </#assign>
 <#include "main.ftl">
