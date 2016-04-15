@@ -194,7 +194,7 @@ function repainter(nodesJSON){
 		document.getElementById("gtd").style = "color:red";
 	}
 	
-	if(start[0] != null && finish[0 != null]){
+	if(start[0] != null && finish[0] != null]){
 		document.getElementById("enterButton").style = "color:green";
 	}else{
 		document.getElementById("enterButton").style = "color:red";
