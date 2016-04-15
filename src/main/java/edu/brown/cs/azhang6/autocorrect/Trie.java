@@ -8,13 +8,18 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
+/**
+ * Trie.
+ * 
+ * @author Simon
+ */
 public class Trie implements Collection<String> {
 
   private int size = 0;
   private TrieNode base;
 
   /**
-   * Returns the base of the Trie
+   * Returns the base of the Trie.
    *
    * @return - returns private root for the Trie
    */
@@ -28,7 +33,7 @@ public class Trie implements Collection<String> {
   }
 
   /**
-   * Constructor for Trie
+   * Constructor for Trie.
    *
    * @param words - a collection of strings
    */
@@ -39,7 +44,7 @@ public class Trie implements Collection<String> {
   }
 
   /**
-   * Nested class for Trie defining the nodes
+   * Nested class for Trie defining the nodes.
    *
    * @author Simon
    *
@@ -50,10 +55,10 @@ public class Trie implements Collection<String> {
     private static final long serialVersionUID = 1L;
 
     // Points to the parent TrieNode
-    TrieNode parent;
+    private TrieNode parent;
 
     // Check to see if a word exists
-    protected boolean word = false;
+    private boolean word = false;
 
     /**
      * Constructor for TrieNode Uses HashMap constructor with parameters of
@@ -64,17 +69,31 @@ public class Trie implements Collection<String> {
     }
 
     /**
-     * To see if the word is valid
+     * To see if the word is valid.
      *
      * @return if word is valid
      */
     public boolean validWord() {
       return word;
     }
+
+    /**
+     * @return the parent
+     */
+    public TrieNode getParent() {
+      return parent;
+    }
+
+    /**
+     * @return the word
+     */
+    public boolean isWord() {
+      return word;
+    }
   }
 
   /**
-   * Nested class for Trie allowing it to be Iterable
+   * Nested class for Trie allowing it to be Iterable.
    *
    * @author Simon
    *
@@ -86,7 +105,7 @@ public class Trie implements Collection<String> {
     private Deque<Iterator<Entry<Character, TrieNode>>> q = new ArrayDeque<>();
 
     /**
-     * Iterator for the Trie
+     * Iterator for the Trie.
      *
      * @param node - trie node
      * @param s string
@@ -95,7 +114,7 @@ public class Trie implements Collection<String> {
       sb.append(s);
       q.push(node.entrySet().iterator());
 
-      if (node.word) {
+      if (node.isWord()) {
         next = s;
       } else {
         findNext();
@@ -103,7 +122,7 @@ public class Trie implements Collection<String> {
     }
 
     /**
-     * Finds the next node
+     * Finds the next node.
      */
     private void findNext() {
       next = null;
@@ -121,7 +140,7 @@ public class Trie implements Collection<String> {
 
           q.push(iterator);
 
-          if (node.word) {
+          if (node.isWord()) {
             next = sb.toString();
             return;
           }
@@ -156,7 +175,7 @@ public class Trie implements Collection<String> {
   }
 
   /**
-   * Creates TrieNodes
+   * Creates TrieNodes.
    *
    * @return - constructed new Node
    */
@@ -177,7 +196,7 @@ public class Trie implements Collection<String> {
   }
 
   /**
-   * Finds the node for a given word
+   * Finds the node for a given word.
    *
    * @param word - word that is being searched for
    * @return - The TrieNode where the word occurs (null otherwise)
@@ -197,7 +216,7 @@ public class Trie implements Collection<String> {
   }
 
   /**
-   * Checks to see if the string is a prefix Node
+   * Checks to see if the string is a prefix Node.
    *
    * @param s - string that is being searched for
    * @return - returns true if it is contained in the Trie

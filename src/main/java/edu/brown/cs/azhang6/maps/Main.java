@@ -12,14 +12,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import edu.brown.cs.azhang6.autocorrect.Autocorrect;
 import edu.brown.cs.azhang6.db.Database;
-import edu.brown.cs.azhang6.dimension.Dimensional;
 import edu.brown.cs.azhang6.dimension.DimensionalDistance;
 import edu.brown.cs.azhang6.dimension.LatLng;
 import edu.brown.cs.azhang6.graph.Edge;
 import edu.brown.cs.azhang6.graph.Vertex;
 import edu.brown.cs.azhang6.graphs.Graphs;
 import edu.brown.cs.azhang6.graphs.Walk;
-import edu.brown.cs.azhang6.kdtree.KDNode;
 import edu.brown.cs.azhang6.kdtree.KDNodeParallel;
 import edu.brown.cs.azhang6.kdtree.KDVertex;
 import edu.brown.cs.azhang6.kdtree.LatLngKDTree;
@@ -27,13 +25,10 @@ import edu.brown.cs.azhang6.pair.OrderedPair;
 import freemarker.template.Configuration;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.nio.charset.IllegalCharsetNameException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -161,6 +156,11 @@ public class Main {
    * Edges in shortest path.
    */
   private final Map<String, Boolean> pathEdges = new ConcurrentHashMap<>();
+  
+  /**
+   * Length of shortest path.
+   */
+  private double shortestPathLength = -1;
 
   public static boolean done = false;
 
@@ -495,6 +495,7 @@ public class Main {
       newEdges.clear();
       newCoords.clear();
       pathEdges.clear();
+      shortestPathLength = -1;
       return new ModelAndView(ImmutableMap.of(), "maps.ftl");
     }
   }
@@ -576,18 +577,21 @@ public class Main {
         oldEdges.addAll(newEdges);
         newEdges.clear();
         newCoords.clear();
+        shortestPathLength = shortestPath.second();
       } else {
         System.out.println("no shortest path");
         oldEdges.addAll(newEdges);
         newEdges.clear();
         newCoords.clear();
         pathEdges.clear();
+        shortestPathLength = -1;
       }
       Map<String, Object> variables = ImmutableMap.of(
         "oldEdges", oldEdges,
         "newEdges", newEdges,
         "newCoords", newCoords,
-        "pathEdges", pathEdges
+        "pathEdges", pathEdges,
+        "length", shortestPathLength
       );
       return GSON.toJson(variables);
     }
@@ -641,7 +645,8 @@ public class Main {
         "oldEdges", oldEdges,
         "newEdges", newEdges,
         "newCoords", newCoords,
-        "pathEdges", pathEdges
+        "pathEdges", pathEdges,
+        "length", shortestPathLength
       );
       return GSON.toJson(variables);
     }
@@ -778,11 +783,13 @@ public class Main {
       oldEdges.addAll(newEdges);
       newEdges.clear();
       newCoords.clear();
+      shortestPathLength = -1;
       Map<String, Object> variables = ImmutableMap.of(
         "oldEdges", oldEdges,
         "newEdges", newEdges,
         "newCoords", newCoords,
-        "pathEdges", pathEdges
+        "pathEdges", pathEdges,
+        "length", shortestPathLength
       );
       return GSON.toJson(variables);
     }

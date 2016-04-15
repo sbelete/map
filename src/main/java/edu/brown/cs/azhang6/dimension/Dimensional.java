@@ -12,7 +12,6 @@ public interface Dimensional {
    *
    * @param coordinate index of coordinate to get
    * @return coordinate at specified index
-   * @throws IllegalArgumentException if coordinate index is invalid
    */
   double getCoordinate(int coordinate);
 
@@ -28,7 +27,6 @@ public interface Dimensional {
    *
    * @param other dimensional object to find distance to
    * @return distance to other object
-   * @throws IllegalArgumentException if distance to other object not defined
    */
   double distanceTo(Dimensional other);
 

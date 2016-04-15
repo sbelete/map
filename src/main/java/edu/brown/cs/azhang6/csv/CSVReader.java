@@ -55,7 +55,6 @@ public class CSVReader {
    * @param file name of file to read
    * @param delimiter delimiter between fields in the CSV file
    * @throws IOException if could not read file
-   * @throws NullPointerException if either argument is null
    * @throws ParseException if file incorrectly formatted
    */
   public CSVReader(String file, String delimiter)
@@ -138,8 +137,6 @@ public class CSVReader {
    *
    * @param tag tag to get the value of
    * @return value of the tag on the current line
-   * @throws IllegalArgumentException if invalid tag
-   * @throws NullPointerException if tag is null
    * @throws ParseException if file incorrectly formatted
    */
   public String get(String tag) throws ParseException {

@@ -45,7 +45,6 @@ public class Point implements Dimensional {
    *
    * @param coordinate which coordinate to get
    * @return value of the coordinate
-   * @throws IllegalArgumentException if coordinate index out of range
    */
   @Override
   public double getCoordinate(int coordinate) {
@@ -71,9 +70,6 @@ public class Point implements Dimensional {
    *
    * @param other another dimensional object
    * @return distance to other dimensional object
-   * @throws IllegalArgumentException if this object and the argument have
-   * different numbers of coordinates
-   * @throws NullPointerException if argument is null
    */
   @Override
   public double distanceTo(Dimensional other) {
